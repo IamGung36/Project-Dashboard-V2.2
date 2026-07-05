@@ -1,0 +1,3707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SolarTrack | Project Dashboard</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Injected Styles -->
+  <style>
+/* 
+ * SolarTrack Dashboard Stylesheet
+ * Custom Premium Dark Glassmorphism Theme
+ */
+
+:root {
+  --bg-main: #0b0f19;
+  --bg-sidebar: #0f172a;
+  --bg-panel: rgba(30, 41, 59, 0.45);
+  --bg-panel-hover: rgba(30, 41, 59, 0.65);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(14, 165, 233, 0.5);
+  
+  /* Brand Colors */
+  --primary: #0ea5e9;
+  --primary-hover: #0284c7;
+  --primary-soft: rgba(14, 165, 233, 0.15);
+  
+  --secondary: #64748b;
+  --secondary-hover: #475569;
+  
+  --success: #10b981;
+  --success-soft: rgba(16, 185, 129, 0.15);
+  
+  --warning: #f59e0b;
+  --warning-soft: rgba(245, 158, 11, 0.15);
+  
+  --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.15);
+  
+  --info: #3b82f6;
+  --info-soft: rgba(59, 130, 246, 0.15);
+  
+  /* Text Colors */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dark: #64748b;
+  
+  /* Typography & Layout */
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --sidebar-width: 260px;
+  --border-radius-lg: 16px;
+  --border-radius-md: 10px;
+  --border-radius-sm: 6px;
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --glow-shadow: 0 0 15px rgba(14, 165, 233, 0.25);
+}
+
+/* Base resets & styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.08) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* Utilities */
+.d-none { display: none !important; }
+.mt-4 { margin-top: 1.5rem; }
+.mb-3 { margin-bottom: 1rem; }
+.py-4 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+.bg-danger-soft { background-color: var(--danger-soft) !important; }
+.text-danger { color: var(--danger) !important; }
+.max-w-4xl { max-width: 896px; }
+.max-w-md { max-width: 448px; }
+.col-span-2 { grid-column: span 2 / span 2; }
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--secondary);
+}
+
+/* App Container Layout */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar Styling */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  padding: 1.5rem 1.25rem;
+}
+
+.sidebar-header {
+  padding-bottom: 2rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-icon {
+  font-size: 1.75rem;
+  color: var(--primary);
+  filter: drop-shadow(0 0 8px rgba(14, 165, 233, 0.4));
+  animation: logo-glow 3s ease-in-out infinite alternate;
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 30%, var(--primary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-grow: 1;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  border-radius: var(--border-radius-md);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: var(--transition-smooth);
+}
+
+.nav-item:hover {
+  color: var(--text-main);
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.nav-item.active {
+  color: var(--text-main);
+  background-color: var(--primary-soft);
+  box-shadow: inset 0 0 0 1px rgba(14, 165, 233, 0.2);
+  position: relative;
+}
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 4px;
+  background-color: var(--primary);
+  border-radius: 0 4px 4px 0;
+  box-shadow: var(--glow-shadow);
+}
+
+.nav-icon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.db-status-container {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--border-radius-sm);
+  background-color: rgba(0, 0, 0, 0.2);
+  font-size: 0.8rem;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.online {
+  background-color: var(--success);
+  box-shadow: 0 0 8px var(--success);
+}
+
+.status-dot.local {
+  background-color: var(--info);
+  box-shadow: 0 0 8px var(--info);
+}
+
+.status-text {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* Main Content Area */
+.main-content {
+  margin-left: var(--sidebar-width);
+  flex-grow: 1;
+  padding: 2rem 2.5rem;
+  width: calc(100% - var(--sidebar-width));
+}
+
+/* Topbar Styling */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.25rem;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.page-title-container h1 {
+  font-size: 1.85rem;
+  color: var(--text-main);
+}
+
+.page-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.search-box {
+  position: relative;
+  width: 280px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.65rem 1rem 0.65rem 2.3rem;
+  border-radius: var(--border-radius-md);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  transition: var(--transition-smooth);
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--glow-shadow);
+  background-color: var(--bg-panel-hover);
+}
+
+/* Button Component */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  border-radius: var(--border-radius-md);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  color: #fff;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  box-shadow: var(--glow-shadow);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: var(--bg-panel);
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-panel-hover);
+  border-color: var(--text-muted);
+}
+
+.btn-danger {
+  background-color: var(--danger);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.25);
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+.btn-icon-only {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-md);
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.btn-icon-only:hover, .btn-icon-only.active {
+  color: var(--text-main);
+  border-color: var(--primary);
+  background-color: var(--primary-soft);
+}
+
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  border-radius: var(--border-radius-sm);
+}
+
+/* Glassmorphism Panel */
+.glass-panel {
+  background-color: var(--bg-panel);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow);
+}
+
+/* Tab pane behavior */
+.tab-pane {
+  display: none;
+}
+
+.tab-pane.active {
+  display: block;
+  animation: fadeIn 0.4s ease;
+}
+
+/* KPI Cards Grid */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.kpi-card {
+  background-color: var(--bg-panel);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: var(--box-shadow);
+  transition: var(--transition-smooth);
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.6);
+}
+
+.kpi-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.kpi-icon-wrapper.blue { background-color: var(--info-soft); color: var(--info); }
+.kpi-icon-wrapper.amber { background-color: var(--warning-soft); color: var(--warning); }
+.kpi-icon-wrapper.green { background-color: var(--success-soft); color: var(--success); }
+.kpi-icon-wrapper.purple { background-color: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+
+.kpi-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.kpi-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kpi-value {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.kpi-value .unit {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+/* Dashboard grid for charts */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+}
+
+.chart-card {
+  padding: 1.5rem;
+  min-height: 320px;
+}
+
+.panel-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.panel-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.chart-container {
+  width: 100%;
+  height: 250px;
+}
+
+/* Map Components */
+.map-card {
+  padding: 1.5rem;
+}
+
+.map-preview-container {
+  width: 100%;
+  height: 380px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  position: relative;
+}
+
+.map-full-container {
+  padding: 1rem;
+  border-radius: var(--border-radius-lg);
+}
+
+/* Custom Leaflet Dark Mode styling */
+.leaflet-container {
+  background: var(--bg-main) !important;
+  font-family: var(--font-body);
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: var(--bg-sidebar) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md) !important;
+  box-shadow: var(--box-shadow) !important;
+}
+
+.leaflet-popup-tip {
+  background-color: var(--bg-sidebar) !important;
+  border-left: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.map-popup-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 200px;
+}
+
+.map-popup-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.35rem;
+  color: #fff;
+}
+
+.map-popup-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.map-popup-row strong {
+  color: var(--text-main);
+}
+
+.map-popup-btn {
+  margin-top: 0.5rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background-color: var(--primary);
+  color: #fff;
+  padding: 0.35rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-align: center;
+  transition: var(--transition-smooth);
+}
+
+.map-popup-btn:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Filters Bar */
+.filters-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 1.25rem;
+  padding: 1.25rem 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  min-width: 160px;
+  flex-grow: 1;
+}
+
+.filter-group label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--border-radius-md);
+  background-color: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  transition: var(--transition-smooth);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--glow-shadow);
+}
+
+textarea.form-control {
+  resize: vertical;
+}
+
+.view-toggle-group {
+  display: flex;
+  gap: 0.4rem;
+}
+
+/* Project Cards Grid */
+.projects-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  transition: var(--transition-smooth);
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(14, 165, 233, 0.3);
+  box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.7);
+}
+
+.project-card-image {
+  height: 150px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+  background-color: var(--bg-sidebar);
+}
+
+.project-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.3));
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 1rem;
+}
+
+.project-card-code {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 700;
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid var(--border-color);
+  color: var(--primary);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+}
+
+.project-card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex-grow: 1;
+}
+
+.project-card-title {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #fff;
+  /* limit to 2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 2.8em;
+}
+
+.project-specs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 0.75rem;
+  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.spec-label {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.spec-val {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.spec-val i {
+  color: var(--text-muted);
+  margin-right: 0.3rem;
+}
+
+.project-progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--info));
+  border-radius: 3px;
+  width: 0%;
+  transition: width 0.6s ease;
+}
+
+.project-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid var(--border-color);
+  background-color: rgba(15, 23, 42, 0.2);
+}
+
+.engineer-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.engineer-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background-color: var(--primary-soft);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.65rem;
+  border: 1px solid rgba(14, 165, 233, 0.2);
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+/* Badges styling */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.badge-success { background-color: var(--success-soft); color: var(--success); }
+.badge-warning { background-color: var(--warning-soft); color: var(--warning); }
+.badge-danger { background-color: var(--danger-soft); color: var(--danger); }
+.badge-info { background-color: var(--info-soft); color: var(--info); }
+.badge-secondary { background-color: rgba(255,255,255,0.06); color: var(--text-muted); }
+
+/* Table View styling */
+.table-responsive {
+  overflow-x: auto;
+  border-radius: var(--border-radius-lg);
+}
+
+.project-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.project-table th {
+  padding: 1rem 1.25rem;
+  background-color: rgba(15, 23, 42, 0.6);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.project-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  vertical-align: middle;
+}
+
+.project-table tbody tr {
+  transition: var(--transition-smooth);
+}
+
+.project-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.02);
+}
+
+.td-project-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: #fff;
+}
+
+.td-capacity {
+  font-weight: 500;
+}
+
+.table-progress-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 120px;
+}
+
+/* Modals & Dialogs */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(7, 10, 20, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 1rem;
+}
+
+.modal-backdrop.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  width: 100%;
+  border-radius: var(--border-radius-lg);
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  transform: translateY(-20px) scale(0.95);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+}
+
+.modal-backdrop.show .modal-content {
+  transform: translateY(0) scale(1);
+}
+
+.modal-header {
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(15, 23, 42, 0.4);
+}
+
+.modal-header h2 {
+  font-size: 1.35rem;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.modal-close:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.modal-body {
+  padding: 1.5rem 1.75rem;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.modal-footer {
+  padding: 1.25rem 1.75rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  background-color: rgba(15, 23, 42, 0.4);
+}
+
+/* Form Tabs Layout */
+.form-tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+}
+
+.form-tab-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  padding: 0.6rem 1.1rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+
+.form-tab-btn:hover {
+  color: var(--text-main);
+}
+
+.form-tab-btn.active {
+  color: var(--primary);
+  border-bottom-color: var(--primary);
+}
+
+.form-tab-content {
+  display: none;
+}
+
+.form-tab-content.active {
+  display: block;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Form Grid */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.form-group label .required {
+  color: var(--danger);
+  margin-left: 0.15rem;
+}
+
+/* Deliverables Editor */
+.deliverables-section {
+  background-color: rgba(0,0,0,0.15);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-md);
+  padding: 1rem;
+}
+
+.deliverables-header {
+  display: grid;
+  grid-template-columns: 60px 1fr 100px 60px;
+  padding: 0.5rem 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.deliverables-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  max-height: 250px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.deliverable-form-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 100px 60px;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: var(--border-radius-sm);
+  padding: 0.4rem 0.5rem;
+}
+
+.col-status {
+  display: flex;
+  justify-content: center;
+}
+
+.col-status input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--success);
+}
+
+.col-name input {
+  width: 95%;
+  background: transparent;
+  border: none;
+  color: #fff;
+  border-bottom: 1px solid transparent;
+  padding: 0.2rem 0;
+  font-size: 0.85rem;
+}
+
+.col-name input:focus {
+  outline: none;
+  border-bottom-color: var(--primary);
+}
+
+.col-hours input {
+  width: 80px;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  background-color: rgba(0,0,0,0.3);
+  border: 1px solid var(--border-color);
+  color: #fff;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.col-action {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-delete-row {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: var(--transition-smooth);
+}
+
+.btn-delete-row:hover {
+  color: var(--danger);
+}
+
+/* Empty / Error States */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background-color: var(--bg-panel);
+  border-radius: var(--border-radius-lg);
+  border: 1px dashed var(--border-color);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  color: var(--text-dark);
+  margin-bottom: 1.25rem;
+}
+
+.empty-state h3 {
+  font-size: 1.2rem;
+  color: var(--text-main);
+  margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  z-index: 2000;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.9rem 1.25rem;
+  border-radius: var(--border-radius-md);
+  background-color: var(--bg-sidebar);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--box-shadow);
+  min-width: 280px;
+  max-width: 400px;
+  color: var(--text-main);
+  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  border-left: 4px solid var(--secondary);
+}
+
+.toast-success { border-left-color: var(--success); }
+.toast-error { border-left-color: var(--danger); }
+.toast-info { border-left-color: var(--info); }
+.toast-warning { border-left-color: var(--warning); }
+
+.toast-icon {
+  font-size: 1.1rem;
+}
+
+.toast-success .toast-icon { color: var(--success); }
+.toast-error .toast-icon { color: var(--danger); }
+.toast-info .toast-icon { color: var(--info); }
+.toast-warning .toast-icon { color: var(--warning); }
+
+.toast-message {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes logo-glow {
+  from { filter: drop-shadow(0 0 4px rgba(14, 165, 233, 0.3)); }
+  to { filter: drop-shadow(0 0 12px rgba(14, 165, 233, 0.6)); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 80px;
+  }
+  
+  .sidebar-header .logo-text,
+  .sidebar-nav a span,
+  .sidebar-footer .btn span,
+  .db-status-container .status-text {
+    display: none;
+  }
+  
+  .logo {
+    justify-content: center;
+  }
+  
+  .sidebar-footer .btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    padding: 0;
+  }
+  
+  .db-status-container {
+    justify-content: center;
+    background: none;
+    padding: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 60px; /* space for mobile navbar if added */
+  }
+  
+  .main-content {
+    padding: 1.25rem;
+  }
+  
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .search-box {
+    width: 100%;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .col-span-2 {
+    grid-column: span 1 / span 1;
+  }
+}
+
+/* ================= ADJUSTMENT ADDITIONS ================= */
+.form-divider {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, var(--border-color) 20%, var(--border-color) 80%, rgba(255,255,255,0) 100%);
+  margin: 1.5rem 0;
+}
+
+.systems-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.system-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background-color: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--border-color);
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--border-radius-md);
+  transition: var(--transition-smooth);
+}
+
+.system-checkbox-row:hover {
+  background-color: rgba(15, 23, 42, 0.7);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.system-checkbox-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.system-checkbox-row label {
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  flex-grow: 1;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.system-capacity-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  opacity: 0.3;
+  pointer-events: none;
+  transition: var(--transition-smooth);
+}
+
+.system-checkbox-row.active .system-capacity-wrapper {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.system-capacity-input {
+  width: 75px;
+  padding: 0.3rem 0.45rem;
+  border-radius: var(--border-radius-sm);
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  color: #fff;
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.system-capacity-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--glow-shadow);
+}
+
+.system-capacity-unit {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Price Updates Table styles */
+.price-table {
+  width: 100%;
+}
+
+.price-table input {
+  width: 100%;
+  padding: 0.35rem 0.55rem;
+  border-radius: var(--border-radius-sm);
+  background-color: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  color: #fff;
+  font-size: 0.8rem;
+  text-align: right;
+  transition: var(--transition-smooth);
+}
+
+.price-table input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: var(--glow-shadow);
+}
+
+.price-table td {
+  padding: 0.5rem 0.75rem !important;
+  vertical-align: middle;
+}
+
+.price-table th {
+  padding: 0.6rem 0.75rem !important;
+}
+
+.price-table .col-action {
+  text-align: center;
+}
+
+.price-table .btn-delete-row:hover {
+  color: var(--danger);
+  transform: scale(1.1);
+}
+
+
+</style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <i class="fa-solid fa-solar-panel logo-icon"></i>
+          <span class="logo-text">SolarTrack</span>
+        </div>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-tab="overview">
+          <i class="fa-solid fa-chart-pie nav-icon"></i>
+          <span>Overview</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="portfolio">
+          <i class="fa-solid fa-award nav-icon"></i>
+          <span>Portfolio (Awarded)</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="underdevelopment">
+          <i class="fa-solid fa-person-digging nav-icon"></i>
+          <span>Underdevelopment</span>
+        </a>
+        <a href="#" class="nav-item" data-tab="map-view">
+          <i class="fa-solid fa-map-location-dot nav-icon"></i>
+          <span>Interactive Map</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <button class="btn btn-primary btn-add-project" id="btn-add-project-sidebar">
+          <i class="fa-solid fa-plus"></i>
+          <span>New Project</span>
+        </button>
+        <div class="db-status-container">
+          <div class="status-dot online" id="status-indicator"></div>
+          <span class="status-text" id="status-label">GAS Mode</span>
+        </div>
+      </div>
+    </aside>
+    
+    <!-- Main Content Area -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="page-title-container">
+          <h1 id="page-title">Dashboard Overview</h1>
+          <p class="page-subtitle" id="page-subtitle">Real-time solar project metrics and statuses</p>
+        </div>
+        
+        <div class="topbar-actions">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" id="global-search" placeholder="Search projects..." list="project-names-datalist">
+            <datalist id="project-names-datalist">
+              <!-- Autocomplete project names populated dynamically -->
+            </datalist>
+          </div>
+          <button class="btn btn-secondary" id="btn-sync" title="Synchronize with Google Sheet">
+            <i class="fa-solid fa-arrows-rotate" id="sync-icon"></i>
+            <span>Refresh</span>
+          </button>
+        </div>
+      </header>
+      
+      <!-- Content Container -->
+      <div class="content-body">
+        
+        <!-- ================= OVERVIEW TAB ================= -->
+        <section id="tab-overview" class="tab-pane active">
+          <!-- KPI Cards Grid -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-icon-wrapper blue">
+                <i class="fa-solid fa-folder-tree"></i>
+              </div>
+              <div class="kpi-info">
+                <span class="kpi-label">Total Projects</span>
+                <span class="kpi-value" id="kpi-total-projects">0</span>
+              </div>
+            </div>
+            
+            <div class="kpi-card">
+              <div class="kpi-icon-wrapper amber">
+                <i class="fa-solid fa-bolt"></i>
+              </div>
+              <div class="kpi-info">
+                <span class="kpi-label">Solar Capacity</span>
+                <span class="kpi-value" id="kpi-solar-capacity">0.0 <span class="unit">kWp</span></span>
+              </div>
+            </div>
+            
+            <div class="kpi-card">
+              <div class="kpi-icon-wrapper green">
+                <i class="fa-solid fa-battery-three-quarters"></i>
+              </div>
+              <div class="kpi-info">
+                <span class="kpi-label">BESS Capacity</span>
+                <span class="kpi-value" id="kpi-bess-capacity">0.0 <span class="unit">kWh</span></span>
+              </div>
+            </div>
+            
+            <div class="kpi-card">
+              <div class="kpi-icon-wrapper purple">
+                <i class="fa-solid fa-circle-check"></i>
+              </div>
+              <div class="kpi-info">
+                <span class="kpi-label">Avg. Completion</span>
+                <span class="kpi-value" id="kpi-avg-progress">0%</span>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Charts Section -->
+          <div class="dashboard-grid">
+            <div class="chart-card glass-panel">
+              <h3 class="panel-title">Project Stages</h3>
+              <div id="chart-stages" class="chart-container"></div>
+            </div>
+            
+            <div class="chart-card glass-panel">
+              <h3 class="panel-title">Capacity by Region (kWp)</h3>
+              <div id="chart-regions" class="chart-container"></div>
+            </div>
+          </div>
+          
+          <!-- Overview Map Preview -->
+          <div class="map-card glass-panel mt-4">
+            <div class="panel-header-row">
+              <h3 class="panel-title">Geographic Locations</h3>
+              <span class="badge badge-info"><i class="fa-solid fa-location-dot"></i> Interactive Map</span>
+            </div>
+            <div id="overview-map" class="map-preview-container"></div>
+          </div>
+        </section>
+        
+        <!-- ================= PORTFOLIO TAB (AWARDED PROJECTS) ================= -->
+        <section id="tab-portfolio" class="tab-pane">
+          <!-- Filters bar -->
+          <div class="filters-bar glass-panel">
+            <div class="filter-group">
+              <label for="portfolio-filter-region">Region</label>
+              <select id="portfolio-filter-region" class="form-control filter-region">
+                <option value="All">All Regions</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="portfolio-filter-engineer">BD Engineer</label>
+              <select id="portfolio-filter-engineer" class="form-control filter-engineer">
+                <option value="All">All Engineers</option>
+              </select>
+            </div>
+            
+            <div class="view-toggle-group">
+              <button class="btn btn-icon-only active grid-view-btn" data-target-tab="portfolio" title="Card View">
+                <i class="fa-solid fa-grip"></i>
+              </button>
+              <button class="btn btn-icon-only table-view-btn" data-target-tab="portfolio" title="Table View">
+                <i class="fa-solid fa-list"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Grid & Table containers -->
+          <div id="portfolio-grid-container" class="projects-cards-grid mt-4">
+            <!-- Grid cards -->
+          </div>
+          <div id="portfolio-table-container" class="table-responsive glass-panel mt-4 d-none">
+            <table class="project-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Project Name</th>
+                  <th>Region</th>
+                  <th>BD Engineer</th>
+                  <th>Solar (kWp)</th>
+                  <th>BESS (kWh)</th>
+                  <th>Status</th>
+                  <th>Stage</th>
+                  <th>Deadline</th>
+                  <th>Progress</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="portfolio-table-body">
+                <!-- Rows -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="empty-state d-none" id="portfolio-empty-state">
+            <i class="fa-solid fa-circle-exclamation empty-icon"></i>
+            <h3>No Portfolio Projects Found</h3>
+            <p>Try adjusting your search query or filters.</p>
+          </div>
+        </section>
+        
+        <!-- ================= UNDERDEVELOPMENT TAB (PROJECT OVERVIEW) ================= -->
+        <section id="tab-underdevelopment" class="tab-pane">
+          <!-- Filters bar -->
+          <div class="filters-bar glass-panel">
+            <div class="filter-group">
+              <label for="underdev-filter-region">Region</label>
+              <select id="underdev-filter-region" class="form-control filter-region">
+                <option value="All">All Regions</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="underdev-filter-status">Work Status</label>
+              <select id="underdev-filter-status" class="form-control filter-status">
+                <option value="All">All Statuses</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Standby">Standby</option>
+              </select>
+            </div>
+            
+            <div class="filter-group">
+              <label for="underdev-filter-engineer">BD Engineer</label>
+              <select id="underdev-filter-engineer" class="form-control filter-engineer">
+                <option value="All">All Engineers</option>
+              </select>
+            </div>
+            
+            <div class="view-toggle-group">
+              <button class="btn btn-icon-only active grid-view-btn" data-target-tab="underdevelopment" title="Card View">
+                <i class="fa-solid fa-grip"></i>
+              </button>
+              <button class="btn btn-icon-only table-view-btn" data-target-tab="underdevelopment" title="Table View">
+                <i class="fa-solid fa-list"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Grid & Table containers -->
+          <div id="underdev-grid-container" class="projects-cards-grid mt-4">
+            <!-- Grid cards -->
+          </div>
+          <div id="underdev-table-container" class="table-responsive glass-panel mt-4 d-none">
+            <table class="project-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Project Name</th>
+                  <th>Region</th>
+                  <th>BD Engineer</th>
+                  <th>Solar (kWp)</th>
+                  <th>BESS (kWh)</th>
+                  <th>Status</th>
+                  <th>Stage</th>
+                  <th>Deadline</th>
+                  <th>Progress</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="underdev-table-body">
+                <!-- Rows -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="empty-state d-none" id="underdev-empty-state">
+            <i class="fa-solid fa-circle-exclamation empty-icon"></i>
+            <h3>No Underdevelopment Projects Found</h3>
+            <p>Try adjusting your search query or filters.</p>
+          </div>
+        </section>
+        
+        <!-- ================= MAP VIEW TAB ================= -->
+        <section id="tab-map-view" class="tab-pane">
+          <div class="map-full-container glass-panel">
+            <div id="full-screen-map" style="width: 100%; height: 65vh; border-radius: 12px;"></div>
+          </div>
+        </section>
+        
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= UPDATE PROJECT DETAILS MODAL ================= -->
+  <div class="modal-backdrop" id="project-modal">
+    <div class="modal-content glass-panel max-w-4xl" style="height: 90vh;">
+      <div class="modal-header">
+        <h2 id="modal-title"><i class="fa-solid fa-pen-to-square"></i> Update Project Details</h2>
+        <button class="modal-close" id="btn-close-modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      
+      <form id="project-form" style="display: flex; flex-direction: column; height: calc(100% - 60px);">
+        <input type="hidden" id="form-project-id">
+        
+        <div class="modal-body" style="overflow-y: auto; padding: 1.5rem 2rem;">
+          
+          <!-- Row 1: Code & Name -->
+          <div class="form-grid mb-3">
+            <div class="form-group">
+              <label for="form-code">Project Code (ReadOnly)</label>
+              <input type="text" id="form-code" class="form-control" readonly style="background-color: rgba(255,255,255,0.03); cursor: not-allowed; opacity: 0.8;">
+            </div>
+            
+            <div class="form-group">
+              <label for="form-name">Project Name <span class="required">*</span></label>
+              <input type="text" id="form-name" class="form-control" required placeholder="Enter project name">
+            </div>
+          </div>
+          
+          <!-- Row 2: Region, BD Engineer, Investor, Business Type -->
+          <div class="form-grid mb-3" style="grid-template-columns: repeat(4, 1fr);">
+            <div class="form-group">
+              <label for="form-region">Region <span class="required">*</span></label>
+              <select id="form-region" class="form-control" required>
+                <option value="">Select Region</option>
+                <option value="Central">Central</option>
+                <option value="North">North</option>
+                <option value="South">South</option>
+                <option value="East">East</option>
+                <option value="West">West</option>
+                <option value="Northeast">Northeast</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="form-engineer">BD Engineer <span class="required">*</span></label>
+              <select id="form-engineer" class="form-control" required>
+                <option value="Gung">Gung (BD Engineer)</option>
+                <option value="Hone">Hone (BD Engineer)</option>
+                <option value="Golf">Golf (BD Engineer)</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="form-investor">Investor</label>
+              <select id="form-investor" class="form-control">
+                <option value="GPSC">GPSC</option>
+                <option value="PTT">PTT</option>
+                <option value="GC">GC</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="form-business-type">Business Type</label>
+              <select id="form-business-type" class="form-control">
+                <option value="EPC">EPC</option>
+                <option value="PPA">PPA</option>
+                <option value="Consultancy">Consultancy</option>
+              </select>
+            </div>
+          </div>
+          
+          <!-- Row 3: Client -->
+          <div class="form-group mb-4">
+            <label for="form-client">Client</label>
+            <input type="text" id="form-client" class="form-control" placeholder="Client Name">
+          </div>
+          
+          <hr class="form-divider mb-4">
+          
+          <!-- Section 2: Installation Systems & Capacity -->
+          <div class="systems-section mb-4">
+            <h3 class="section-title mb-3" style="font-size: 1rem; color: #fff; font-weight: 600;"><i class="fa-solid fa-solar-panel"></i> Installation Systems & Capacity (MW)</h3>
+            <div class="systems-grid" id="form-systems-checkbox-list">
+              <!-- Checkbox items dynamically rendered here -->
+            </div>
+            
+            <button type="button" class="btn btn-sm btn-secondary mt-3" id="btn-add-system-type">
+              <i class="fa-solid fa-plus"></i> Add New System Type
+            </button>
+          </div>
+          
+          <hr class="form-divider mb-4">
+          
+          <!-- Section 3: Coordinates, Maps, Deadline, Stage, Status -->
+          <div class="form-grid mb-3" style="grid-template-columns: 1fr 1.5fr 1fr;">
+            <div class="form-group">
+              <label for="form-coordinates">Coordinates (Latitude, Longitude)</label>
+              <input type="text" id="form-coordinates" class="form-control" placeholder="e.g. 13.013062, 101.135042">
+            </div>
+            
+            <div class="form-group">
+              <label for="form-maps-link">Google Maps Link</label>
+              <input type="url" id="form-maps-link" class="form-control" placeholder="https://maps.app.goo.gl/...">
+            </div>
+            
+            <div class="form-group">
+              <label for="form-deadline">Project Deadline <span class="required">*</span></label>
+              <input type="date" id="form-deadline" class="form-control" required>
+            </div>
+          </div>
+          
+          <div class="form-grid mb-4" style="grid-template-columns: 1fr 1fr;">
+            <div class="form-group">
+              <label for="form-stage">Development Stage <span class="required">*</span></label>
+              <select id="form-stage" class="form-control" required>
+                <option value="Underdevelop">Underdevelop</option>
+                <option value="Detailed Design">Detailed Design</option>
+                <option value="Procurement">Procurement</option>
+                <option value="Construction">Construction</option>
+                <option value="COD">COD</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="form-status">Work Status <span class="required">*</span></label>
+              <select id="form-status" class="form-control" required>
+                <option value="Standby">Standby</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Completed">Complete</option>
+              </select>
+            </div>
+          </div>
+          
+          <hr class="form-divider mb-4">
+          
+          <!-- Section 4: Project Image -->
+          <div class="image-upload-section mb-4">
+            <h3 class="section-title mb-3" style="font-size: 1rem; color: #fff; font-weight: 600;"><i class="fa-regular fa-image"></i> Project Image</h3>
+            <div class="form-grid mb-3">
+              <div class="form-group">
+                <label for="form-image-file">Upload Image File</label>
+                <input type="file" id="form-image-file" class="form-control" accept="image/*">
+              </div>
+              <div class="form-group">
+                <label for="form-image-url">Or Image URL</label>
+                <input type="url" id="form-image-url" class="form-control" placeholder="https://example.com/image.jpg">
+              </div>
+            </div>
+            
+            <div class="image-preview-wrapper p-3 glass-panel">
+              <span class="preview-label mb-2 d-block text-xs" style="color: var(--text-muted);"><i class="fa-solid fa-eye"></i> Current Image Preview</span>
+              <div class="image-preview-container" style="display: flex; justify-content: center; align-items: center; min-height: 140px; background-color: rgba(0,0,0,0.2); border-radius: var(--border-radius-md); border: 1px dashed var(--border-color);">
+                <img id="form-image-preview" src="" alt="Project Preview" style="max-height: 180px; max-width: 100%; border-radius: var(--border-radius-sm); display: none;">
+                <span id="form-image-placeholder" class="text-muted text-sm">No Image Selected</span>
+              </div>
+            </div>
+          </div>
+          
+          <hr class="form-divider mb-4">
+          
+          <!-- Section 5: Deliverables Checklist -->
+          <div class="deliverables-section mb-4">
+            <div class="panel-header-row mb-3">
+              <h3 class="section-title" style="font-size: 1rem; color: #fff; font-weight: 600;"><i class="fa-solid fa-list-check"></i> Deliverables Checklist</h3>
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-add-deliverable">
+                <i class="fa-solid fa-plus"></i> Add Item
+              </button>
+            </div>
+            <div class="deliverables-header">
+              <span class="col-status">Done</span>
+              <span class="col-name">Deliverable Name</span>
+              <span class="col-hours">Hours</span>
+              <span class="col-action">Delete</span>
+            </div>
+            <div class="deliverables-list" id="form-deliverables-list">
+              <!-- Deliverable rows loaded dynamically -->
+            </div>
+          </div>
+          
+          <hr class="form-divider mb-4">
+          
+          <!-- Section 6: Price Updates (อัพเดทราคา) -->
+          <div class="price-section mb-4">
+            <div class="panel-header-row mb-3">
+              <h3 class="section-title" style="font-size: 1rem; color: #fff; font-weight: 600;"><i class="fa-solid fa-coins"></i> อัพเดทราคา (Price Updates)</h3>
+              <button type="button" class="btn btn-sm btn-secondary" id="btn-add-price-row">
+                <i class="fa-solid fa-plus"></i> เพิ่มแถวประวัติราคา
+              </button>
+            </div>
+            <div class="table-responsive glass-panel">
+              <table class="project-table price-table">
+                <thead>
+                  <tr>
+                    <th style="width: 80px; text-align: center;">ครั้งที่</th>
+                    <th>B/Wp (บาท)</th>
+                    <th>Bath (ราคารวม)</th>
+                    <th>Fx (อัตราแลกเปลี่ยน)</th>
+                    <th>PV price (USD/Wp)</th>
+                    <th style="width: 60px; text-align: center;">ลบ</th>
+                  </tr>
+                </thead>
+                <tbody id="form-price-updates-body">
+                  <!-- Price update rows loaded dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <hr class="form-divider mb-4">
+          
+          <!-- Row 7: Notes -->
+          <div class="form-group mb-2">
+            <label for="form-notes">General Notes</label>
+            <textarea id="form-notes" class="form-control" rows="3" placeholder="Enter notes, links, or documentation references..."></textarea>
+          </div>
+          
+        </div>
+        
+        <div class="modal-footer" style="padding: 1rem 2rem; border-top: 1px solid var(--border-color); background-color: rgba(15, 23, 42, 0.4); display: flex; justify-content: flex-end; gap: 1rem; margin-top: auto;">
+          <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="btn-save-project">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" id="delete-modal" style="z-index: 1050;">
+    <div class="modal-content glass-panel max-w-md">
+      <div class="modal-header bg-danger-soft">
+        <h2>Confirm Delete</h2>
+        <button class="modal-close" id="btn-close-delete-modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="modal-body py-4">
+        <p>Are you sure you want to delete project <strong id="delete-project-code"></strong> - <span id="delete-project-name"></span>?</p>
+        <p class="text-danger mt-2"><i class="fa-solid fa-triangle-exclamation"></i> This action is permanent and will delete the row from Google Sheets.</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancel-delete">Cancel</button>
+        <button type="button" class="btn btn-danger" id="btn-confirm-delete">Delete Project</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Leaflet Map JS Script -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- ApexCharts Script -->
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+  <!-- Injected App JavaScript -->
+  <script>
+/**
+ * SolarTrack Dashboard Frontend Logic
+ * Supports Real-time Google Apps Script execution and local mockup fallback
+ */
+
+// Global State
+const state = {
+  projects: [],
+  filters: {
+    search: '',
+    portfolio: {
+      region: 'All',
+      engineer: 'All'
+    },
+    underdevelopment: {
+      region: 'All',
+      status: 'All',
+      engineer: 'All'
+    }
+  },
+  activeTab: 'overview',
+  viewModes: {
+    portfolio: 'grid',
+    underdevelopment: 'grid'
+  },
+  maps: {
+    overview: null,
+    fullScreen: null
+  },
+  mapMarkers: {
+    overview: [],
+    fullScreen: []
+  },
+  charts: {
+    stages: null,
+    regions: null
+  }
+};
+
+// Mock Data for local preview
+const MOCK_PROJECTS = [
+  {
+    "id": "P-001",
+    "Project code": "G26-001",
+    "name": "Solar Carpark Fashion Island",
+    "region": "Central",
+    "engineer": "Gung",
+    "id engineer": "M-001",
+    "businessType": "EPC",
+    "investor": "GC",
+    "client": "Land and Houses",
+    "systems": '[{"type":"Carpark","capacity":0.0018}]',
+    "Solar capacity (kWp)": 1.8,
+    "BESS capacity (kWh)": 0,
+    "lat": 13.8248,
+    "lng": 100.6782,
+    "googleMapsLink": "https://maps.app.goo.gl/tBwGjQyFf46d1224",
+    "image": "https://images.unsplash.com/photo-1594818379496-da1e345b06a9?w=600&auto=format&fit=crop&q=60",
+    "deliverables": '[{"name":"Survey Reports","hours":4,"checked":true},{"name":"PV Layout","hours":4,"checked":true},{"name":"Single Line Diagram","hours":4,"checked":true},{"name":"PVSyst Simulation","hours":4,"checked":true},{"name":"Bill of Quantities (BOQ)","hours":4,"checked":true},{"name":"Load Profile Analysis","hours":4,"checked":true}]',
+    "notes": "Premium installation completed.",
+    "status": "In Progress",
+    "stage": "Underdevelop",
+    "deadline": "2026-10-30",
+    "constructionDate": "",
+    "codDate": "",
+    "prTest": "",
+    "pv": "",
+    "inverter": "",
+    "awardNote": "",
+    "revisions": "",
+    "priceUpdates": '[{"bWp":15.76,"bath":15760000.00,"fx":32.30,"pvPrice":0.11}]'
+  },
+  {
+    "id": "P-002",
+    "Project code": "G26-002",
+    "name": "BESS Microgrid Koh Samui",
+    "region": "South",
+    "engineer": "Hone",
+    "id engineer": "M-002",
+    "businessType": "EPC",
+    "investor": "Other",
+    "client": "Samui Resort Association",
+    "systems": '[{"type":"Rooftop","capacity":0.005},{"type":"BESS","capacity":0.001}]',
+    "Solar capacity (kWp)": 5.0,
+    "BESS capacity (kWh)": 1.0,
+    "lat": 9.512,
+    "lng": 100.0136,
+    "googleMapsLink": "https://maps.app.goo.gl/tBwGjQyFf46d1225",
+    "image": "https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=600&auto=format&fit=crop&q=60",
+    "deliverables": '[{"name":"Survey Reports","hours":4,"checked":true},{"name":"PV Layout","hours":4,"checked":true},{"name":"Single Line Diagram","hours":4,"checked":true},{"name":"PVSyst Simulation","hours":4,"checked":true},{"name":"Bill of Quantities (BOQ)","hours":4,"checked":true},{"name":"Load Profile Analysis","hours":4,"checked":true}]',
+    "notes": "Testing grid stability.",
+    "status": "Standby",
+    "stage": "Underdevelop",
+    "deadline": "2026-11-15",
+    "constructionDate": "",
+    "codDate": "",
+    "prTest": "",
+    "pv": "",
+    "inverter": "",
+    "awardNote": "",
+    "revisions": "",
+    "priceUpdates": '[]'
+  },
+  {
+    "id": "P-003",
+    "Project code": "G26-003",
+    "name": "Solar Farm Chiang Mai Agri",
+    "region": "North",
+    "engineer": "Golf",
+    "id engineer": "M-003",
+    "businessType": "PPA",
+    "investor": "GPSC",
+    "client": "Northern Agriculture Ltd",
+    "systems": '[{"type":"Farm","capacity":0.0085}]',
+    "Solar capacity (kWp)": 8.5,
+    "BESS capacity (kWh)": 0,
+    "lat": 18.7883,
+    "lng": 98.9853,
+    "googleMapsLink": "https://maps.app.goo.gl/tBwGjQyFf46d1227",
+    "image": "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&auto=format&fit=crop&q=60",
+    "deliverables": '[{"name":"Survey Reports","hours":4,"checked":true},{"name":"PV Layout","hours":4,"checked":true},{"name":"Single Line Diagram","hours":4,"checked":true},{"name":"PVSyst Simulation","hours":4,"checked":true},{"name":"Bill of Quantities (BOQ)","hours":4,"checked":true},{"name":"Load Profile Analysis","hours":4,"checked":true}]',
+    "notes": "Awaiting local permits.",
+    "status": "In Progress",
+    "stage": "Underdevelop",
+    "deadline": "2027-02-15",
+    "constructionDate": "",
+    "codDate": "",
+    "prTest": "",
+    "pv": "",
+    "inverter": "",
+    "awardNote": "",
+    "revisions": "",
+    "priceUpdates": '[]'
+  },
+  {
+    "id": "P-004",
+    "Project code": "G26-004",
+    "name": "Hybrid Floating & Carpark Rayong",
+    "region": "East",
+    "engineer": "Gung",
+    "id engineer": "M-001",
+    "businessType": "PPA",
+    "investor": "PTT",
+    "client": "Amata City Rayong",
+    "systems": '[{"type":"Floating","capacity":0.0125},{"type":"Carpark","capacity":0.005}]',
+    "Solar capacity (kWp)": 17.5,
+    "BESS capacity (kWh)": 0,
+    "lat": 13.0125,
+    "lng": 101.1963,
+    "googleMapsLink": "https://maps.app.goo.gl/tBwGjQyFf46d1228",
+    "image": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&auto=format&fit=crop&q=60",
+    "deliverables": '[{"name":"Survey Reports","hours":4,"checked":true},{"name":"PV Layout","hours":4,"checked":true},{"name":"Single Line Diagram","hours":4,"checked":true},{"name":"PVSyst Simulation","hours":4,"checked":true},{"name":"Bill of Quantities (BOQ)","hours":4,"checked":true},{"name":"Load Profile Analysis","hours":4,"checked":true}]',
+    "notes": "Large industrial project.",
+    "status": "Standby",
+    "stage": "Underdevelop",
+    "deadline": "2026-09-01",
+    "constructionDate": "",
+    "codDate": "",
+    "prTest": "",
+    "pv": "",
+    "inverter": "",
+    "awardNote": "",
+    "revisions": "",
+    "priceUpdates": '[]'
+  },
+  {
+    "id": "P-005",
+    "Project code": "G26-005",
+    "name": "Commercial Rooftop Bangkok Mall",
+    "region": "Central",
+    "engineer": "Gung",
+    "id engineer": "M-001",
+    "businessType": "EPC",
+    "investor": "GPSC",
+    "client": "Bangkok Plaza Corp",
+    "systems": '[{"type":"Rooftop","capacity":5.0},{"type":"BESS","capacity":3.0}]',
+    "Solar capacity (kWp)": 5000,
+    "BESS capacity (kWh)": 3000,
+    "lat": 13.9257,
+    "lng": 100.6104,
+    "googleMapsLink": "",
+    "image": "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=600&auto=format&fit=crop&q=60",
+    "deliverables": '[{"name":"Survey Reports","hours":4,"checked":true},{"name":"PV Layout","hours":4,"checked":true},{"name":"Single Line Diagram","hours":4,"checked":true},{"name":"PVSyst Simulation","hours":4,"checked":true},{"name":"Bill of Quantities (BOQ)","hours":4,"checked":true},{"name":"Load Profile Analysis","hours":4,"checked":true}]',
+    "notes": "Largest rooftop grid in Bangkok area.",
+    "status": "In Progress",
+    "stage": "Underdevelop",
+    "deadline": "2026-06-29",
+    "constructionDate": "",
+    "codDate": "",
+    "prTest": "",
+    "pv": "",
+    "inverter": "",
+    "awardNote": "",
+    "revisions": "",
+    "priceUpdates": '[]'
+  },
+  {
+    "id": "P-006",
+    "Project code": "G26-006",
+    "name": "Floating Solar Phitsanulok",
+    "region": "North",
+    "engineer": "Golf",
+    "id engineer": "M-003",
+    "businessType": "EPC",
+    "investor": "GPSC",
+    "client": "Phitsanulok Provincial Hospital",
+    "systems": '[{"type":"Floating","capacity":1.0}]',
+    "Solar capacity (kWp)": 1000,
+    "BESS capacity (kWh)": 0,
+    "lat": 18.785,
+    "lng": 98.9823,
+    "googleMapsLink": "",
+    "image": "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&auto=format&fit=crop&q=60",
+    "deliverables": '[]',
+    "notes": "Pending environmental impact report.",
+    "status": "Completed",
+    "stage": "COD",
+    "deadline": "2026-06-29",
+    "constructionDate": "",
+    "codDate": "",
+    "prTest": "",
+    "pv": "",
+    "inverter": "",
+    "awardNote": "",
+    "revisions": "",
+    "priceUpdates": '[]'
+  }
+];
+
+// Determine if we are running in Google Apps Script environment
+function isGAS() {
+  return typeof google !== 'undefined' && typeof google.script !== 'undefined';
+}
+
+// Escape HTML utility to prevent XSS in dynamic DOM mapping
+function escapeHtml(unsafe) {
+  if (!unsafe) return '';
+  return unsafe
+    .toString()
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+// Initialize App
+document.addEventListener('DOMContentLoaded', () => {
+  setupNavigation();
+  setupFilters();
+  setupEventListeners();
+  
+  // Set Environment Status indicator
+  const indicator = document.getElementById('status-indicator');
+  const label = document.getElementById('status-label');
+  
+  if (isGAS()) {
+    indicator.className = 'status-dot online';
+    label.innerText = 'Real-time (GAS)';
+  } else {
+    indicator.className = 'status-dot local';
+    label.innerText = 'Local Preview (Mock)';
+  }
+  
+  // Load initial data
+  syncData();
+});
+
+// Setup Navigation Tab switching
+function setupNavigation() {
+  const navItems = document.querySelectorAll('.nav-item');
+  const pageTitle = document.getElementById('page-title');
+  const pageSubtitle = document.getElementById('page-subtitle');
+  
+  navItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      
+      const tabName = item.getAttribute('data-tab');
+      if (!tabName) return;
+      
+      // Update sidebar active state
+      navItems.forEach(ni => ni.classList.remove('active'));
+      item.classList.add('active');
+      
+      // Show tab content
+      document.querySelectorAll('.tab-pane').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+      
+      state.activeTab = tabName;
+      
+      // Customize Topbar Title
+      if (tabName === 'overview') {
+        pageTitle.innerText = 'Dashboard Overview';
+        pageSubtitle.innerText = 'Real-time solar project metrics and statuses';
+        setTimeout(refreshOverviewTabWidgets, 100);
+      } else if (tabName === 'portfolio') {
+        pageTitle.innerText = 'Portfolio (Awarded Projects)';
+        pageSubtitle.innerText = 'Manage and filter successfully awarded and COD projects';
+        renderAll();
+      } else if (tabName === 'underdevelopment') {
+        pageTitle.innerText = 'Project Overview (Underdevelopment)';
+        pageSubtitle.innerText = 'Track and update projects currently under development';
+        renderAll();
+      } else if (tabName === 'map-view') {
+        pageTitle.innerText = 'Interactive Map';
+        pageSubtitle.innerText = 'Visualise all solar sites across Thailand';
+        setTimeout(initFullScreenMap, 100);
+      }
+    });
+  });
+}
+
+// Force Leaflet/ApexCharts to resize properly when switching tabs
+function refreshOverviewTabWidgets() {
+  if (state.maps.overview) {
+    state.maps.overview.invalidateSize();
+  }
+  if (state.charts.stages) state.charts.stages.windowResizeHandler();
+  if (state.charts.regions) state.charts.regions.windowResizeHandler();
+}
+
+// Synchronize Data
+function syncData() {
+  const syncBtn = document.getElementById('btn-sync');
+  const syncIcon = document.getElementById('sync-icon');
+  
+  syncBtn.disabled = true;
+  syncIcon.classList.add('fa-spin');
+  showToast('info', 'Synchronizing data...');
+  
+  if (isGAS()) {
+    google.script.run
+      .withSuccessHandler((response) => {
+        syncBtn.disabled = false;
+        syncIcon.classList.remove('fa-spin');
+        
+        if (response.status === 'success') {
+          state.projects = response.projects;
+          showToast('success', 'Data loaded successfully from Google Sheets.');
+          processAndRender();
+        } else {
+          showToast('error', 'Sync failed: ' + response.message);
+          console.error(response);
+          loadFallbackData();
+        }
+      })
+      .withFailureHandler((error) => {
+        syncBtn.disabled = false;
+        syncIcon.classList.remove('fa-spin');
+        showToast('error', 'Apps Script Server Connection Error: ' + error.toString());
+        loadFallbackData();
+      })
+      .getProjectsData();
+  } else {
+    // Local simulation
+    setTimeout(() => {
+      syncBtn.disabled = false;
+      syncIcon.classList.remove('fa-spin');
+      if (state.projects.length === 0) {
+        state.projects = JSON.parse(JSON.stringify(MOCK_PROJECTS)); // Deep clone
+      }
+      showToast('success', 'Local mock database loaded.');
+      processAndRender();
+    }, 800);
+  }
+}
+
+// Fallback if Apps Script fails
+function loadFallbackData() {
+  console.log("Loading mock fallback data...");
+  state.projects = JSON.parse(JSON.stringify(MOCK_PROJECTS));
+  processAndRender();
+}
+
+// Process data and execute all renderings
+function processAndRender() {
+  updateAutocompleteDatalist();
+  updateFiltersDropdowns();
+  renderAll();
+}
+
+// Populate datalist with existing project names for search autocomplete suggestions
+function updateAutocompleteDatalist() {
+  const datalist = document.getElementById('project-names-datalist');
+  if (!datalist) return;
+  
+  const names = new Set();
+  state.projects.forEach(p => {
+    if (p.name) names.add(p.name);
+  });
+  
+  let html = '';
+  Array.from(names).sort().forEach(name => {
+    html += `<option value="${escapeHtml(name)}">`;
+  });
+  
+  datalist.innerHTML = html;
+}
+
+// Calculate progress percent from deliverables JSON array
+function calculateProgress(deliverablesJson) {
+  if (!deliverablesJson) return 0;
+  try {
+    const list = typeof deliverablesJson === 'string' ? JSON.parse(deliverablesJson) : deliverablesJson;
+    if (!Array.isArray(list) || list.length === 0) return 0;
+    
+    const checked = list.filter(d => d.checked).length;
+    return Math.round((checked / list.length) * 100);
+  } catch (e) {
+    return 0;
+  }
+}
+
+// Recalculates metrics and updates DOM
+function renderAll() {
+  // Update general KPI metrics from all projects
+  const totalProjects = state.projects.length;
+  let totalSolar = 0;
+  let totalBess = 0;
+  let totalProgressPercentSum = 0;
+  let progressCount = 0;
+  
+  state.projects.forEach(p => {
+    const solarVal = parseFloat(p["Solar capacity (kWp) "] || p["Solar capacity (kWp)"] || 0);
+    const bessVal = parseFloat(p["BESS capacity (kWh)"] || p["BESS capacity"] || 0);
+    
+    totalSolar += isNaN(solarVal) ? 0 : solarVal;
+    totalBess += isNaN(bessVal) ? 0 : bessVal;
+    
+    const prog = calculateProgress(p.deliverables);
+    totalProgressPercentSum += prog;
+    progressCount++;
+  });
+  
+  const avgProgress = progressCount > 0 ? Math.round(totalProgressPercentSum / progressCount) : 0;
+  
+  document.getElementById('kpi-total-projects').innerText = totalProjects;
+  document.getElementById('kpi-solar-capacity').innerHTML = `${formatNumber(totalSolar)} <span class="unit">kWp</span>`;
+  document.getElementById('kpi-bess-capacity').innerHTML = `${formatNumber(totalBess)} <span class="unit">kWh</span>`;
+  document.getElementById('kpi-avg-progress').innerText = `${avgProgress}%`;
+  
+  // Render overview charts & overview maps
+  initOverviewMap();
+  renderCharts();
+  
+  // Render Portfolio and Underdevelopment Tabs
+  if (state.activeTab === 'portfolio') {
+    const portfolioFiltered = getFilteredPortfolioProjects();
+    renderTabContent('portfolio', portfolioFiltered);
+  } else if (state.activeTab === 'underdevelopment') {
+    const underdevFiltered = getFilteredUnderdevelopmentProjects();
+    renderTabContent('underdevelopment', underdevFiltered);
+  } else if (state.activeTab === 'map-view') {
+    initFullScreenMap();
+  }
+}
+
+// Check if a project is categorized as Portfolio (Awarded)
+function isPortfolioProject(p) {
+  return p.stage === 'COD' || p.status === 'Completed' || p.status === 'Complete';
+}
+
+// Get filtered Portfolio projects list
+function getFilteredPortfolioProjects() {
+  const query = state.filters.search.toLowerCase().trim();
+  const region = state.filters.portfolio.region;
+  const engineer = state.filters.portfolio.engineer;
+  
+  return state.projects.filter(p => {
+    if (!isPortfolioProject(p)) return false;
+    
+    // Search filter
+    const matchesSearch = !query || 
+      (p.name && p.name.toLowerCase().includes(query)) ||
+      (p.id && p.id.toLowerCase().includes(query)) ||
+      (p["Project code"] && p["Project code"].toLowerCase().includes(query)) ||
+      (p.engineer && p.engineer.toLowerCase().includes(query)) ||
+      (p.client && p.client.toLowerCase().includes(query));
+      
+    // Dropdowns
+    const matchesRegion = region === 'All' || p.region === region;
+    const matchesEngineer = engineer === 'All' || p.engineer === engineer;
+    
+    return matchesSearch && matchesRegion && matchesEngineer;
+  });
+}
+
+// Get filtered Underdevelopment projects list
+function getFilteredUnderdevelopmentProjects() {
+  const query = state.filters.search.toLowerCase().trim();
+  const region = state.filters.underdevelopment.region;
+  const status = state.filters.underdevelopment.status;
+  const engineer = state.filters.underdevelopment.engineer;
+  
+  return state.projects.filter(p => {
+    if (isPortfolioProject(p)) return false;
+    
+    // Search filter
+    const matchesSearch = !query || 
+      (p.name && p.name.toLowerCase().includes(query)) ||
+      (p.id && p.id.toLowerCase().includes(query)) ||
+      (p["Project code"] && p["Project code"].toLowerCase().includes(query)) ||
+      (p.engineer && p.engineer.toLowerCase().includes(query)) ||
+      (p.client && p.client.toLowerCase().includes(query));
+      
+    // Dropdowns
+    const matchesRegion = region === 'All' || p.region === region;
+    const matchesStatus = status === 'All' || p.status === status;
+    const matchesEngineer = engineer === 'All' || p.engineer === engineer;
+    
+    return matchesSearch && matchesRegion && matchesStatus && matchesEngineer;
+  });
+}
+
+// Generate unique filters for both dropdown tables
+function updateFiltersDropdowns() {
+  const regions = new Set();
+  const engineers = new Set();
+  
+  state.projects.forEach(p => {
+    if (p.region) regions.add(p.region);
+    if (p.engineer) engineers.add(p.engineer);
+  });
+  
+  const rSorted = Array.from(regions).sort();
+  const engSorted = Array.from(engineers).sort();
+  
+  // Update Portfolio filters
+  const portRegion = document.getElementById('portfolio-filter-region');
+  const portEng = document.getElementById('portfolio-filter-engineer');
+  
+  const savedPortReg = state.filters.portfolio.region;
+  const savedPortEng = state.filters.portfolio.engineer;
+  
+  portRegion.innerHTML = '<option value="All">All Regions</option>';
+  portEng.innerHTML = '<option value="All">All Engineers</option>';
+  
+  rSorted.forEach(r => portRegion.innerHTML += `<option value="${r}">${r}</option>`);
+  engSorted.forEach(e => portEng.innerHTML += `<option value="${e}">${e}</option>`);
+  
+  portRegion.value = rSorted.includes(savedPortReg) ? savedPortReg : 'All';
+  portEng.value = engSorted.includes(savedPortEng) ? savedPortEng : 'All';
+  
+  // Update Underdevelopment filters
+  const devRegion = document.getElementById('underdev-filter-region');
+  const devEng = document.getElementById('underdev-filter-engineer');
+  
+  const savedDevReg = state.filters.underdevelopment.region;
+  const savedDevEng = state.filters.underdevelopment.engineer;
+  
+  devRegion.innerHTML = '<option value="All">All Regions</option>';
+  devEng.innerHTML = '<option value="All">All Engineers</option>';
+  
+  rSorted.forEach(r => devRegion.innerHTML += `<option value="${r}">${r}</option>`);
+  engSorted.forEach(e => devEng.innerHTML += `<option value="${e}">${e}</option>`);
+  
+  devRegion.value = rSorted.includes(savedDevReg) ? savedDevReg : 'All';
+  devEng.value = engSorted.includes(savedDevEng) ? savedDevEng : 'All';
+}
+
+// Render dynamic content for projects catalog (Portfolio or Underdev)
+function renderTabContent(tabName, list) {
+  const isPortfolio = tabName === 'portfolio';
+  const containerId = isPortfolio ? 'portfolio-grid-container' : 'underdev-grid-container';
+  const tableContainerId = isPortfolio ? 'portfolio-table-container' : 'underdev-table-container';
+  const tableBodyId = isPortfolio ? 'portfolio-table-body' : 'underdev-table-body';
+  const emptyStateId = isPortfolio ? 'portfolio-empty-state' : 'underdev-empty-state';
+  
+  const gridContainer = document.getElementById(containerId);
+  const tableContainer = document.getElementById(tableContainerId);
+  const tbody = document.getElementById(tableBodyId);
+  const emptyState = document.getElementById(emptyStateId);
+  
+  const viewMode = state.viewModes[tabName];
+  
+  if (viewMode === 'grid') {
+    gridContainer.classList.remove('d-none');
+    tableContainer.classList.add('d-none');
+  } else {
+    gridContainer.classList.add('d-none');
+    tableContainer.classList.remove('d-none');
+  }
+  
+  if (list.length === 0) {
+    gridContainer.innerHTML = '';
+    tbody.innerHTML = '';
+    emptyState.classList.remove('d-none');
+    return;
+  }
+  
+  emptyState.classList.add('d-none');
+  
+  // Render grid
+  if (viewMode === 'grid') {
+    let gridHtml = '';
+    list.forEach(p => {
+      const progress = calculateProgress(p.deliverables);
+      const solarVal = parseFloat(p["Solar capacity (kWp) "] || p["Solar capacity (kWp)"] || 0);
+      const bessVal = parseFloat(p["BESS capacity (kWh)"] || p["BESS capacity"] || 0);
+      
+      let statusClass = 'badge-secondary';
+      if (p.status === 'In Progress') statusClass = 'badge-info';
+      else if (p.status === 'Standby') statusClass = 'badge-warning';
+      else if (p.status === 'Completed' || p.status === 'Complete') statusClass = 'badge-success';
+      
+      const defaultImage = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&auto=format&fit=crop&q=60';
+      const bgImage = p.image || defaultImage;
+      const initial = p.engineer ? p.engineer.charAt(0).toUpperCase() : '?';
+      
+      gridHtml += `
+        <div class="project-card glass-panel animate-fade-in">
+          <div class="project-card-image" style="background-image: url('${bgImage}')">
+            <div class="project-card-overlay">
+              <span class="project-card-code">${p["Project code"] || p.id}</span>
+              <span class="badge ${statusClass}">${p.status || 'Unknown'}</span>
+            </div>
+          </div>
+          
+          <div class="project-card-body">
+            <h3 class="project-card-title" title="${p.name}">${p.name || 'Unnamed Project'}</h3>
+            
+            <div class="project-specs-grid">
+              <div class="spec-item">
+                <span class="spec-label">Solar Capacity</span>
+                <span class="spec-val"><i class="fa-solid fa-solar-panel"></i>${solarVal} kWp</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">BESS Capacity</span>
+                <span class="spec-val"><i class="fa-solid fa-battery-three-quarters"></i>${bessVal} kWh</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Region</span>
+                <span class="spec-val"><i class="fa-solid fa-earth-asia"></i>${p.region || '-'}</span>
+              </div>
+              <div class="spec-item">
+                <span class="spec-label">Business Type</span>
+                <span class="spec-val"><i class="fa-solid fa-briefcase"></i>${p.businessType || '-'}</span>
+              </div>
+            </div>
+            
+            <div class="project-progress-container">
+              <div class="progress-info">
+                <span>Progress</span>
+                <span>${progress}%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-bar" style="width: ${progress}%"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="project-card-footer">
+            <div class="engineer-badge" title="BD Engineer: ${p.engineer || 'Unassigned'}">
+              <div class="engineer-avatar">${initial}</div>
+              <span>${p.engineer || 'Unassigned'}</span>
+            </div>
+            <div class="card-actions">
+              <button class="btn btn-icon-only btn-edit" onclick="openEditModal('${p.id}')" title="Edit project">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button class="btn btn-icon-only btn-delete" onclick="triggerDeleteProject('${p.id}')" title="Delete project" style="color: var(--danger);">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+    gridContainer.innerHTML = gridHtml;
+  } else {
+    // Render table
+    let tableHtml = '';
+    list.forEach(p => {
+      const progress = calculateProgress(p.deliverables);
+      const solarVal = parseFloat(p["Solar capacity (kWp) "] || p["Solar capacity (kWp)"] || 0);
+      const bessVal = parseFloat(p["BESS capacity (kWh)"] || p["BESS capacity"] || 0);
+      
+      let statusClass = 'badge-secondary';
+      if (p.status === 'In Progress') statusClass = 'badge-info';
+      else if (p.status === 'Standby') statusClass = 'badge-warning';
+      else if (p.status === 'Completed' || p.status === 'Complete') statusClass = 'badge-success';
+      
+      tableHtml += `
+        <tr>
+          <td><span class="project-card-code">${p["Project code"] || p.id}</span></td>
+          <td class="td-project-name" title="${p.name}">${p.name || 'Unnamed Project'}</td>
+          <td>${p.region || '-'}</td>
+          <td>${p.engineer || 'Unassigned'}</td>
+          <td class="td-capacity">${solarVal}</td>
+          <td class="td-capacity">${bessVal}</td>
+          <td><span class="badge ${statusClass}">${p.status || 'Unknown'}</span></td>
+          <td><span class="badge badge-secondary">${p.stage || 'Underdevelop'}</span></td>
+          <td style="white-space: nowrap;">${p.deadline || '-'}</td>
+          <td>
+            <div class="table-progress-bar">
+              <div class="progress-track" style="width: 80px;">
+                <div class="progress-bar" style="width: ${progress}%"></div>
+              </div>
+              <span>${progress}%</span>
+            </div>
+          </td>
+          <td>
+            <div class="card-actions">
+              <button class="btn btn-icon-only btn-sm" onclick="openEditModal('${p.id}')" title="Edit">
+                <i class="fa-solid fa-pen-to-square"></i>
+              </button>
+              <button class="btn btn-icon-only btn-sm" onclick="triggerDeleteProject('${p.id}')" title="Delete" style="color: var(--danger);">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    });
+    tbody.innerHTML = tableHtml;
+  }
+}
+
+// Initialize Overview Map
+function initOverviewMap() {
+  const mapElement = document.getElementById('overview-map');
+  if (!mapElement) return;
+  
+  if (state.maps.overview) {
+    state.mapMarkers.overview.forEach(m => state.maps.overview.removeLayer(m));
+    state.mapMarkers.overview = [];
+  } else {
+    state.maps.overview = L.map('overview-map', {
+      zoomControl: true,
+      scrollWheelZoom: false
+    }).setView([13.7367, 100.5231], 6);
+    
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
+    }).addTo(state.maps.overview);
+  }
+  
+  plotMarkers(state.maps.overview, state.mapMarkers.overview);
+}
+
+// Initialize Full-Screen Map
+function initFullScreenMap() {
+  const mapElement = document.getElementById('full-screen-map');
+  if (!mapElement) return;
+  
+  if (state.maps.fullScreen) {
+    state.mapMarkers.fullScreen.forEach(m => state.maps.fullScreen.removeLayer(m));
+    state.mapMarkers.fullScreen = [];
+    state.maps.fullScreen.invalidateSize();
+  } else {
+    state.maps.fullScreen = L.map('full-screen-map').setView([13.7367, 100.5231], 6);
+    
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: 'abcd',
+      maxZoom: 20
+    }).addTo(state.maps.fullScreen);
+  }
+  
+  plotMarkers(state.maps.fullScreen, state.mapMarkers.fullScreen);
+}
+
+// Plot Markers
+function plotMarkers(mapObj, markerArray) {
+  let validLocationsCount = 0;
+  const bounds = [];
+  
+  state.projects.forEach(p => {
+    const lat = parseFloat(p.lat);
+    const lng = parseFloat(p.lng);
+    
+    if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+      validLocationsCount++;
+      const solarVal = parseFloat(p["Solar capacity (kWp) "] || p["Solar capacity (kWp)"] || 0);
+      const bessVal = parseFloat(p["BESS capacity (kWh)"] || p["BESS capacity"] || 0);
+      
+      const popupHtml = `
+        <div class="map-popup-card">
+          <div class="map-popup-title">${escapeHtml(p.name || 'Unnamed Project')}</div>
+          <div class="map-popup-row">
+            <span>Project Code:</span>
+            <strong>${p["Project code"] || p.id}</strong>
+          </div>
+          <div class="map-popup-row">
+            <span>Solar Capacity:</span>
+            <strong>${solarVal} kWp</strong>
+          </div>
+          <div class="map-popup-row">
+            <span>BESS Capacity:</span>
+            <strong>${bessVal} kWh</strong>
+          </div>
+          <div class="map-popup-row">
+            <span>Region:</span>
+            <strong>${p.region || '-'}</strong>
+          </div>
+          <div class="map-popup-row">
+            <span>Engineer:</span>
+            <strong>${p.engineer || 'Unassigned'}</strong>
+          </div>
+          <div class="map-popup-row">
+            <span>Status:</span>
+            <strong>${p.status || 'Unknown'}</strong>
+          </div>
+          ${p.googleMapsLink ? `<a href="${p.googleMapsLink}" target="_blank" class="map-popup-btn"><i class="fa-solid fa-map-pin"></i> Google Maps</a>` : ''}
+        </div>
+      `;
+      
+      // Determine marker color
+      let markerColor = '#64748b';
+      if (p.status === 'In Progress') markerColor = '#0ea5e9';
+      else if (p.status === 'Completed' || p.status === 'Complete') markerColor = '#10b981';
+      
+      const marker = L.circleMarker([lat, lng], {
+        radius: 8,
+        fillColor: markerColor,
+        color: '#ffffff',
+        weight: 1.5,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).bindPopup(popupHtml);
+      
+      marker.addTo(mapObj);
+      markerArray.push(marker);
+      bounds.push([lat, lng]);
+    }
+  });
+  
+  if (validLocationsCount > 0 && mapObj) {
+    mapObj.fitBounds(bounds, { padding: [30, 30] });
+  }
+}
+
+// Render ApexCharts
+function renderCharts() {
+  const stagesData = {};
+  const regionsData = {};
+  
+  state.projects.forEach(p => {
+    const stage = p.stage || 'Underdevelop';
+    stagesData[stage] = (stagesData[stage] || 0) + 1;
+    
+    const region = p.region || 'Unknown';
+    const solarVal = parseFloat(p["Solar capacity (kWp) "] || p["Solar capacity (kWp)"] || 0);
+    regionsData[region] = (regionsData[region] || 0) + (isNaN(solarVal) ? 0 : solarVal);
+  });
+  
+  const stageLabels = Object.keys(stagesData);
+  const stageSeries = Object.values(stagesData);
+  
+  const stageOptions = {
+    series: stageSeries,
+    chart: {
+      type: 'donut',
+      height: 250,
+      background: 'transparent',
+      foreColor: '#94a3b8'
+    },
+    labels: stageLabels,
+    theme: {
+      mode: 'dark',
+      palette: 'palette1'
+    },
+    colors: ['#0ea5e9', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'],
+    dataLabels: {
+      enabled: false
+    },
+    legend: {
+      position: 'bottom',
+      fontSize: '11px',
+      fontFamily: 'Inter, sans-serif'
+    },
+    stroke: {
+      show: true,
+      colors: ['#1e293b'],
+      width: 2
+    },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '70%',
+          background: 'transparent',
+          labels: {
+            show: true,
+            total: {
+              show: true,
+              label: 'Total',
+              color: '#f8fafc',
+              fontSize: '14px',
+              fontFamily: 'Outfit, sans-serif',
+              formatter: function (w) {
+                return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+  
+  if (state.charts.stages) {
+    state.charts.stages.updateOptions(stageOptions);
+  } else if (document.getElementById('chart-stages')) {
+    state.charts.stages = new ApexCharts(document.getElementById('chart-stages'), stageOptions);
+    state.charts.stages.render();
+  }
+  
+  const regionLabels = Object.keys(regionsData);
+  const regionSeries = Object.values(regionsData).map(v => Math.round(v * 100) / 100);
+  
+  const regionOptions = {
+    series: [{
+      name: 'Capacity (kWp)',
+      data: regionSeries
+    }],
+    chart: {
+      type: 'bar',
+      height: 250,
+      background: 'transparent',
+      foreColor: '#94a3b8',
+      toolbar: { show: false }
+    },
+    colors: ['#0ea5e9'],
+    plotOptions: {
+      bar: {
+        borderRadius: 4,
+        horizontal: false,
+        columnWidth: '45%'
+      }
+    },
+    dataLabels: {
+      enabled: false
+    },
+    stroke: {
+      show: true,
+      width: 2,
+      colors: ['transparent']
+    },
+    xaxis: {
+      categories: regionLabels,
+      labels: {
+        style: {
+          fontSize: '11px',
+          fontFamily: 'Inter, sans-serif'
+        }
+      }
+    },
+    yaxis: {
+      title: {
+        text: 'Solar capacity (kWp)',
+        style: {
+          color: '#94a3b8',
+          fontSize: '12px',
+          fontFamily: 'Outfit, sans-serif'
+        }
+      }
+    },
+    fill: {
+      opacity: 0.85
+    },
+    tooltip: {
+      theme: 'dark',
+      y: {
+        formatter: function (val) {
+          return val + " kWp";
+        }
+      }
+    },
+    grid: {
+      borderColor: 'rgba(255, 255, 255, 0.05)',
+      strokeDashArray: 4
+    }
+  };
+  
+  if (state.charts.regions) {
+    state.charts.regions.updateOptions(regionOptions);
+  } else if (document.getElementById('chart-regions')) {
+    state.charts.regions = new ApexCharts(document.getElementById('chart-regions'), regionOptions);
+    state.charts.regions.render();
+  }
+}
+
+// Modal Form State & Dynamic lists
+let formDeliverables = [];
+let formSystems = [];
+let formPriceUpdates = [];
+let uploadedImageBase64 = '';
+
+const STANDARD_SYSTEM_TYPES = ['Rooftop', 'Farm', 'Floating', 'Carpark', 'BESS'];
+
+// Opens Modal
+function openEditModal(projectId = '') {
+  const modal = document.getElementById('project-modal');
+  const title = document.getElementById('modal-title');
+  const form = document.getElementById('project-form');
+  
+  form.reset();
+  formDeliverables = [];
+  formSystems = [];
+  formPriceUpdates = [];
+  uploadedImageBase64 = '';
+  
+  // Set default placeholder image state
+  document.getElementById('form-image-preview').style.display = 'none';
+  document.getElementById('form-image-placeholder').style.display = 'block';
+  
+  if (projectId) {
+    // Editing Mode
+    title.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Update Project Details';
+    const project = state.projects.find(p => p.id === projectId);
+    
+    if (project) {
+      document.getElementById('form-project-id').value = project.id;
+      document.getElementById('form-code').value = project["Project code"] || '';
+      document.getElementById('form-name').value = project.name || '';
+      document.getElementById('form-region').value = project.region || '';
+      document.getElementById('form-engineer').value = project.engineer || 'Gung';
+      document.getElementById('form-engineer-id').value = project["id engineer"] || 'M-001';
+      document.getElementById('form-business-type').value = project.businessType || 'EPC';
+      document.getElementById('form-investor').value = project.investor || 'GPSC';
+      document.getElementById('form-client').value = project.client || '';
+      
+      // Coordinates mapping
+      const latVal = parseFloat(project.lat);
+      const lngVal = parseFloat(project.lng);
+      document.getElementById('form-coordinates').value = (!isNaN(latVal) && !isNaN(lngVal) && latVal !== 0) ? `${latVal}, ${lngVal}` : '';
+      
+      document.getElementById('form-maps-link').value = project.googleMapsLink || '';
+      document.getElementById('form-image-url').value = project.image || '';
+      
+      if (project.image) {
+        document.getElementById('form-image-preview').src = project.image;
+        document.getElementById('form-image-preview').style.display = 'block';
+        document.getElementById('form-image-placeholder').style.display = 'none';
+      }
+      
+      // Select Box mapping
+      document.getElementById('form-status').value = (project.status === 'Completed' || project.status === 'Complete') ? 'Completed' : (project.status || 'Standby');
+      document.getElementById('form-stage').value = project.stage || 'Underdevelop';
+      document.getElementById('form-deadline').value = project.deadline || '';
+      document.getElementById('form-notes').value = project.notes || '';
+      
+      // Parse systems array
+      if (project.systems) {
+        try {
+          if (project.systems.trim().startsWith('[')) {
+            formSystems = JSON.parse(project.systems);
+          } else {
+            // Comma separated fallback
+            project.systems.split(',').forEach(s => {
+              const type = s.trim();
+              if (type) {
+                let capacity = 0;
+                if (type === 'BESS') {
+                  capacity = (parseFloat(project['BESS capacity (kWh)']) || 0) / 1000;
+                } else {
+                  capacity = (parseFloat(project['Solar capacity (kWp) '] || project['Solar capacity (kWp)']) || 0) / 1000;
+                }
+                formSystems.push({ type, capacity });
+              }
+            });
+          }
+        } catch (e) {
+          formSystems = [];
+        }
+      }
+      
+      // Parse deliverables
+      if (project.deliverables) {
+        try {
+          formDeliverables = typeof project.deliverables === 'string' ? JSON.parse(project.deliverables) : project.deliverables;
+        } catch (e) {
+          formDeliverables = [];
+        }
+      }
+      
+      // Parse price updates
+      if (project.priceUpdates) {
+        try {
+          formPriceUpdates = typeof project.priceUpdates === 'string' ? JSON.parse(project.priceUpdates) : project.priceUpdates;
+        } catch (e) {
+          formPriceUpdates = [];
+        }
+      }
+    }
+  } else {
+    // Add Mode
+    title.innerHTML = '<i class="fa-solid fa-plus"></i> Add New Project Profile';
+    document.getElementById('form-project-id').value = '';
+    document.getElementById('form-code').value = '';
+    
+    // Set standard deliverables
+    formDeliverables = [
+      { name: "Survey Reports", hours: 4, checked: false },
+      { name: "PV Layout", hours: 4, checked: false },
+      { name: "Single Line Diagram", hours: 4, checked: false },
+      { name: "PVSyst Simulation", hours: 4, checked: false },
+      { name: "Bill of Quantities (BOQ)", hours: 4, checked: false },
+      { name: "Load Profile Analysis", hours: 4, checked: false }
+    ];
+  }
+  
+  renderFormSystems();
+  renderFormDeliverables();
+  renderFormPriceUpdates();
+  
+  modal.classList.add('show');
+}
+
+// Render systems checkboxes in modal form
+function renderFormSystems() {
+  const container = document.getElementById('form-systems-checkbox-list');
+  container.innerHTML = '';
+  
+  // Form list standard + any custom ones parsed
+  const activeTypes = formSystems.map(s => s.type);
+  const typesToRender = [...STANDARD_SYSTEM_TYPES];
+  
+  formSystems.forEach(s => {
+    if (!typesToRender.includes(s.type)) {
+      typesToRender.push(s.type);
+    }
+  });
+  
+  typesToRender.forEach(type => {
+    const isChecked = activeTypes.includes(type);
+    const checkedAttr = isChecked ? 'checked' : '';
+    const activeClass = isChecked ? 'active' : '';
+    const systemData = formSystems.find(s => s.type === type);
+    const capacityVal = systemData ? systemData.capacity : '';
+    
+    const row = document.createElement('div');
+    row.className = `system-checkbox-row ${activeClass}`;
+    row.innerHTML = `
+      <input type="checkbox" id="system-check-${type}" class="system-checkbox" data-type="${type}" ${checkedAttr} onchange="toggleSystemCheckbox('${type}', this.checked)">
+      <label for="system-check-${type}">${type}</label>
+      <div class="system-capacity-wrapper">
+        <input type="number" step="0.001" min="0" class="system-capacity-input" placeholder="0.0" value="${capacityVal}" oninput="updateSystemCapacity('${type}', this.value)">
+        <span class="system-capacity-unit">MW</span>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function toggleSystemCheckbox(type, isChecked) {
+  const checkboxRow = document.getElementById(`system-check-${type}`).parentElement;
+  if (isChecked) {
+    checkboxRow.classList.add('active');
+    const existing = formSystems.find(s => s.type === type);
+    if (!existing) {
+      formSystems.push({ type: type, capacity: 0 });
+    }
+  } else {
+    checkboxRow.classList.remove('active');
+    formSystems = formSystems.filter(s => s.type !== type);
+  }
+  
+  // Checkboxes change will impact Solar capacity, recalculate prices
+  recalculatePriceTableValues();
+}
+
+function updateSystemCapacity(type, value) {
+  const numericVal = parseFloat(value) || 0;
+  const systemData = formSystems.find(s => s.type === type);
+  if (systemData) {
+    systemData.capacity = numericVal;
+  } else {
+    formSystems.push({ type: type, capacity: numericVal });
+  }
+  
+  recalculatePriceTableValues();
+}
+
+// Calculate on-the-fly Solar capacity in Watt-peak (Wp) for pricing calculations
+function calculateFormSolarCapacityWp() {
+  let solarCapacityMW = 0;
+  formSystems.forEach(s => {
+    if (s.type !== 'BESS') {
+      solarCapacityMW += s.capacity;
+    }
+  });
+  return solarCapacityMW * 1000 * 1000; // 1 MW = 1,000,000 Wp
+}
+
+// Re-computes all rows' Bath total price values based on current Solar Capacity
+function recalculatePriceTableValues() {
+  const capacityWp = calculateTotalSolarCapacityWpFromFormInputs();
+  
+  formPriceUpdates.forEach((row, idx) => {
+    if (row.bWp > 0) {
+      row.bath = row.bWp * capacityWp;
+    }
+  });
+  
+  renderFormPriceUpdates();
+}
+
+// Helper to sum current form system checkbox solar capacities
+function calculateTotalSolarCapacityWpFromFormInputs() {
+  let totalSolarMW = 0;
+  const container = document.getElementById('form-systems-checkbox-list');
+  if (!container) return 0;
+  
+  container.querySelectorAll('.system-checkbox-row').forEach(row => {
+    const check = row.querySelector('.system-checkbox');
+    const input = row.querySelector('.system-capacity-input');
+    if (check && check.checked && check.dataset.type !== 'BESS') {
+      totalSolarMW += parseFloat(input.value) || 0;
+    }
+  });
+  return totalSolarMW * 1000 * 1000;
+}
+
+// Render deliverables checklist inside edit modal
+function renderFormDeliverables() {
+  const container = document.getElementById('form-deliverables-list');
+  container.innerHTML = '';
+  
+  if (!Array.isArray(formDeliverables) || formDeliverables.length === 0) {
+    container.innerHTML = '<div class="text-center py-4 text-muted">No deliverables defined. Click "Add Item" to add one.</div>';
+    return;
+  }
+  
+  formDeliverables.forEach((item, index) => {
+    const checkedAttr = item.checked ? 'checked' : '';
+    const row = document.createElement('div');
+    row.className = 'deliverable-form-row';
+    row.innerHTML = `
+      <div class="col-status">
+        <input type="checkbox" ${checkedAttr} onchange="updateFormDeliverableStatus(${index}, this.checked)">
+      </div>
+      <div class="col-name">
+        <input type="text" value="${escapeHtml(item.name || '')}" placeholder="Deliverable name" onchange="updateFormDeliverableName(${index}, this.value)">
+      </div>
+      <div class="col-hours">
+        <input type="number" value="${item.hours || 0}" min="0" onchange="updateFormDeliverableHours(${index}, this.value)">
+      </div>
+      <div class="col-action">
+        <button type="button" class="btn-delete-row" onclick="removeFormDeliverable(${index})" title="Delete item">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+function updateFormDeliverableStatus(index, isChecked) {
+  if (formDeliverables[index]) formDeliverables[index].checked = isChecked;
+}
+
+function updateFormDeliverableName(index, val) {
+  if (formDeliverables[index]) formDeliverables[index].name = val;
+}
+
+function updateFormDeliverableHours(index, val) {
+  if (formDeliverables[index]) formDeliverables[index].hours = parseInt(val, 10) || 0;
+}
+
+function removeFormDeliverable(index) {
+  formDeliverables.splice(index, 1);
+  renderFormDeliverables();
+}
+
+// Renders the Price Updates Table inside edit modal
+function renderFormPriceUpdates() {
+  const tbody = document.getElementById('form-price-updates-body');
+  tbody.innerHTML = '';
+  
+  if (!Array.isArray(formPriceUpdates) || formPriceUpdates.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">ไม่มีข้อมูลการอัพเดทราคา กดปุ่มเพื่อเพิ่มข้อมูล</td></tr>';
+    return;
+  }
+  
+  formPriceUpdates.forEach((row, index) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align: center; font-weight: 600;">${index + 1}</td>
+      <td>
+        <input type="number" step="0.01" class="price-bWp" placeholder="0.00" value="${row.bWp || ''}" oninput="updatePriceRowBWp(${index}, this.value)">
+      </td>
+      <td>
+        <input type="number" step="1" class="price-bath" placeholder="0.00" value="${row.bath ? Math.round(row.bath) : ''}" oninput="updatePriceRowBath(${index}, this.value)">
+      </td>
+      <td>
+        <input type="number" step="0.01" class="price-fx" placeholder="32.00" value="${row.fx || ''}" oninput="updatePriceRowFx(${index}, this.value)">
+      </td>
+      <td>
+        <input type="number" step="0.01" class="price-pvPrice" placeholder="0.00" value="${row.pvPrice || ''}" oninput="updatePriceRowPV(${index}, this.value)">
+      </td>
+      <td class="col-action">
+        <button type="button" class="btn-delete-row" onclick="removePriceRow(${index})" title="Delete row">
+          <i class="fa-solid fa-trash-can"></i>
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function updatePriceRowBWp(index, val) {
+  const numericBWp = parseFloat(val) || 0;
+  formPriceUpdates[index].bWp = numericBWp;
+  
+  // Calculate Bath: bWp * capacityWp
+  const capacityWp = calculateTotalSolarCapacityWpFromFormInputs();
+  const calculatedBath = numericBWp * capacityWp;
+  formPriceUpdates[index].bath = calculatedBath;
+  
+  // Update UI row input instantly
+  const tr = document.getElementById('form-price-updates-body').children[index];
+  if (tr) {
+    tr.querySelector('.price-bath').value = calculatedBath ? Math.round(calculatedBath) : '';
+  }
+}
+
+function updatePriceRowBath(index, val) {
+  const numericBath = parseFloat(val) || 0;
+  formPriceUpdates[index].bath = numericBath;
+  
+  // Calculate bWp: bath / capacityWp
+  const capacityWp = calculateTotalSolarCapacityWpFromFormInputs();
+  if (capacityWp > 0) {
+    const calculatedBWp = numericBath / capacityWp;
+    formPriceUpdates[index].bWp = Math.round(calculatedBWp * 100) / 100;
+    
+    // Update UI row input instantly
+    const tr = document.getElementById('form-price-updates-body').children[index];
+    if (tr) {
+      tr.querySelector('.price-bWp').value = calculatedBWp.toFixed(2);
+    }
+  }
+}
+
+function updatePriceRowFx(index, val) {
+  formPriceUpdates[index].fx = parseFloat(val) || 0;
+}
+
+function updatePriceRowPV(index, val) {
+  formPriceUpdates[index].pvPrice = parseFloat(val) || 0;
+}
+
+function removePriceRow(index) {
+  formPriceUpdates.splice(index, 1);
+  renderFormPriceUpdates();
+}
+
+// Event bindings & triggers
+function setupEventListeners() {
+  // Modal Closes
+  document.getElementById('btn-close-modal').addEventListener('click', closeModal);
+  document.getElementById('btn-cancel-modal').addEventListener('click', closeModal);
+  
+  // Submit project form
+  document.getElementById('project-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    saveProjectForm();
+  });
+  
+  // Add Deliverable row
+  document.getElementById('btn-add-deliverable').addEventListener('click', () => {
+    formDeliverables.push({ name: '', hours: 0, checked: false });
+    renderFormDeliverables();
+    const container = document.getElementById('form-deliverables-list');
+    container.scrollTop = container.scrollHeight;
+  });
+  
+  // Add System row
+  document.getElementById('btn-add-system-type').addEventListener('click', () => {
+    const newType = prompt("Enter new installation system type:");
+    if (newType && newType.trim() !== "") {
+      const formattedType = newType.trim();
+      const existing = formSystems.find(s => s.type.toLowerCase() === formattedType.toLowerCase());
+      if (!existing) {
+        formSystems.push({ type: formattedType, capacity: 0 });
+        renderFormSystems();
+      } else {
+        showToast('warning', 'This system type already exists.');
+      }
+    }
+  });
+  
+  // Add Price Row
+  document.getElementById('btn-add-price-row').addEventListener('click', () => {
+    formPriceUpdates.push({ bWp: 0, bath: 0, fx: 0, pvPrice: 0 });
+    renderFormPriceUpdates();
+  });
+  
+  // File Upload image preview mapping
+  const fileInput = document.getElementById('form-image-file');
+  const urlInput = document.getElementById('form-image-url');
+  
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        uploadedImageBase64 = event.target.result;
+        
+        // Show preview
+        document.getElementById('form-image-preview').src = uploadedImageBase64;
+        document.getElementById('form-image-preview').style.display = 'block';
+        document.getElementById('form-image-placeholder').style.display = 'none';
+        
+        // Clear text field input
+        urlInput.value = '';
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+  
+  urlInput.addEventListener('input', (e) => {
+    const urlVal = e.target.value.trim();
+    if (urlVal) {
+      uploadedImageBase64 = '';
+      document.getElementById('form-image-preview').src = urlVal;
+      document.getElementById('form-image-preview').style.display = 'block';
+      document.getElementById('form-image-placeholder').style.display = 'none';
+    } else {
+      document.getElementById('form-image-preview').style.display = 'none';
+      document.getElementById('form-image-placeholder').style.display = 'block';
+    }
+  });
+  
+  // Delete project modal events
+  document.getElementById('btn-close-delete-modal').addEventListener('click', closeDeleteModal);
+  document.getElementById('btn-cancel-delete').addEventListener('click', closeDeleteModal);
+  document.getElementById('btn-confirm-delete').addEventListener('click', executeDeleteProject);
+  
+  // Sync refresh button
+  document.getElementById('btn-sync').addEventListener('click', syncData);
+  
+  // Add project buttons
+  document.getElementById('btn-add-project-sidebar').addEventListener('click', () => openEditModal());
+}
+
+// Closes modal
+function closeModal() {
+  document.getElementById('project-modal').classList.remove('show');
+}
+
+// Collects form inputs and saves project to sheet (or simulated database)
+function saveProjectForm() {
+  const saveBtn = document.getElementById('btn-save-project');
+  saveBtn.disabled = true;
+  saveBtn.innerText = 'Saving...';
+  
+  // Prepare project object
+  const projectId = document.getElementById('form-project-id').value;
+  
+  // Clean lists
+  const cleanDeliverables = formDeliverables.filter(d => d.name.trim() !== '');
+  
+  // Parse coordinates
+  let lat = 0;
+  let lng = 0;
+  const coordVal = document.getElementById('form-coordinates').value.trim();
+  if (coordVal) {
+    const parts = coordVal.split(',');
+    if (parts.length === 2) {
+      lat = parseFloat(parts[0]) || 0;
+      lng = parseFloat(parts[1]) || 0;
+    }
+  }
+  
+  // Calculate total capacities from checkbox selections
+  let solarCapacitykWp = 0;
+  let bessCapacitykWh = 0;
+  const cleanSystems = [];
+  
+  const container = document.getElementById('form-systems-checkbox-list');
+  container.querySelectorAll('.system-checkbox-row').forEach(row => {
+    const checkbox = row.querySelector('.system-checkbox');
+    const input = row.querySelector('.system-capacity-input');
+    
+    if (checkbox && checkbox.checked) {
+      const type = checkbox.dataset.type;
+      const capacityMW = parseFloat(input.value) || 0;
+      cleanSystems.push({ type, capacity: capacityMW });
+      
+      if (type === 'BESS') {
+        bessCapacitykWh += capacityMW * 1000;
+      } else {
+        solarCapacitykWp += capacityMW * 1000;
+      }
+    }
+  });
+  
+  // BD Engineer and ID Engineer auto-mapping
+  const engName = document.getElementById('form-engineer').value;
+  let engId = 'M-001';
+  if (engName === 'Hone') engId = 'M-002';
+  else if (engName === 'Golf') engId = 'M-003';
+  
+  // Image URL selection
+  let finalImage = document.getElementById('form-image-url').value.trim();
+  if (uploadedImageBase64) {
+    finalImage = uploadedImageBase64;
+  }
+  
+  const projectData = {
+    "id": projectId,
+    "Project code": document.getElementById('form-code').value.trim(),
+    "name": document.getElementById('form-name').value.trim(),
+    "region": document.getElementById('form-region').value,
+    "engineer": engName,
+    "id engineer": engId,
+    "businessType": document.getElementById('form-business-type').value,
+    "investor": document.getElementById('form-investor').value,
+    "client": document.getElementById('form-client').value.trim(),
+    "Solar capacity (kWp) ": solarCapacitykWp,
+    "Solar capacity (kWp)": solarCapacitykWp,
+    "BESS capacity (kWh)": bessCapacitykWh,
+    "systems": JSON.stringify(cleanSystems),
+    "lat": lat,
+    "lng": lng,
+    "googleMapsLink": document.getElementById('form-maps-link').value.trim(),
+    "image": finalImage,
+    "deliverables": JSON.stringify(cleanDeliverables),
+    "priceUpdates": JSON.stringify(formPriceUpdates),
+    "status": document.getElementById('form-status').value,
+    "stage": document.getElementById('form-stage').value,
+    "deadline": document.getElementById('form-deadline').value,
+    "notes": document.getElementById('form-notes').value.trim()
+  };
+  
+  if (isGAS()) {
+    google.script.run
+      .withSuccessHandler((response) => {
+        saveBtn.disabled = false;
+        saveBtn.innerText = 'Save Project';
+        
+        if (response.status === 'success') {
+          showToast('success', 'Project details saved to Google Sheets successfully.');
+          closeModal();
+          syncData();
+        } else {
+          showToast('error', 'Failed to save: ' + response.message);
+          console.error(response);
+        }
+      })
+      .withFailureHandler((error) => {
+        saveBtn.disabled = false;
+        saveBtn.innerText = 'Save Project';
+        showToast('error', 'Server Error: ' + error.toString());
+      })
+      .saveProject(projectData);
+  } else {
+    // Local Simulation
+    setTimeout(() => {
+      saveBtn.disabled = false;
+      saveBtn.innerText = 'Save Project';
+      
+      if (projectId) {
+        const idx = state.projects.findIndex(p => p.id === projectId);
+        if (idx !== -1) {
+          state.projects[idx] = projectData;
+        }
+      } else {
+        const ids = state.projects.map(p => {
+          const m = p.id.match(/^P-(\d+)$/i);
+          return m ? parseInt(m[1], 10) : 0;
+        });
+        const max = ids.length > 0 ? Math.max(...ids) : 0;
+        const nextId = "P-" + ("000" + (max + 1)).slice(-3);
+        projectData.id = nextId;
+        
+        // Auto-generate project code for mockup local testing
+        projectData["Project code"] = "G26-" + ("000" + (max + 1)).slice(-3);
+        state.projects.push(projectData);
+      }
+      
+      showToast('success', 'Project details saved locally.');
+      closeModal();
+      processAndRender();
+    }, 600);
+  }
+}
+
+// Delete Project
+let projectToDeleteId = '';
+
+function triggerDeleteProject(projectId) {
+  const project = state.projects.find(p => p.id === projectId);
+  if (!project) return;
+  
+  projectToDeleteId = projectId;
+  document.getElementById('delete-project-code').innerText = project["Project code"] || project.id;
+  document.getElementById('delete-project-name').innerText = project.name || 'Unnamed Project';
+  document.getElementById('delete-modal').classList.add('show');
+}
+
+function closeDeleteModal() {
+  document.getElementById('delete-modal').classList.remove('show');
+  projectToDeleteId = '';
+}
+
+function executeDeleteProject() {
+  const delBtn = document.getElementById('btn-confirm-delete');
+  delBtn.disabled = true;
+  delBtn.innerText = 'Deleting...';
+  
+  if (isGAS()) {
+    google.script.run
+      .withSuccessHandler((response) => {
+        delBtn.disabled = false;
+        delBtn.innerText = 'Delete Project';
+        
+        if (response.status === 'success') {
+          showToast('success', 'Project row removed from Google Sheets.');
+          closeDeleteModal();
+          syncData();
+        } else {
+          showToast('error', 'Delete failed: ' + response.message);
+          console.error(response);
+        }
+      })
+      .withFailureHandler((error) => {
+        delBtn.disabled = false;
+        delBtn.innerText = 'Delete Project';
+        showToast('error', 'Server error: ' + error.toString());
+      })
+      .deleteProject(projectToDeleteId);
+  } else {
+    setTimeout(() => {
+      delBtn.disabled = false;
+      delBtn.innerText = 'Delete Project';
+      
+      state.projects = state.projects.filter(p => p.id !== projectToDeleteId);
+      showToast('success', 'Project deleted locally.');
+      closeDeleteModal();
+      processAndRender();
+    }, 500);
+  }
+}
+
+// Setup Filters
+function setupFilters() {
+  // Global search datalist mapping
+  document.getElementById('global-search').addEventListener('input', (e) => {
+    state.filters.search = e.target.value;
+    renderAll();
+  });
+  
+  // Portfolio tab region and engineer filters
+  document.getElementById('portfolio-filter-region').addEventListener('change', (e) => {
+    state.filters.portfolio.region = e.target.value;
+    renderAll();
+  });
+  document.getElementById('portfolio-filter-engineer').addEventListener('change', (e) => {
+    state.filters.portfolio.engineer = e.target.value;
+    renderAll();
+  });
+  
+  // Underdevelopment tab region, status, and engineer filters
+  document.getElementById('underdev-filter-region').addEventListener('change', (e) => {
+    state.filters.underdevelopment.region = e.target.value;
+    renderAll();
+  });
+  document.getElementById('underdev-filter-status').addEventListener('change', (e) => {
+    state.filters.underdevelopment.status = e.target.value;
+    renderAll();
+  });
+  document.getElementById('underdev-filter-engineer').addEventListener('change', (e) => {
+    state.filters.underdevelopment.engineer = e.target.value;
+    renderAll();
+  });
+  
+  // Set view toggles
+  document.querySelectorAll('.grid-view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.targetTab;
+      state.viewModes[tab] = 'grid';
+      
+      // Toggle active visual classes
+      const parent = btn.parentElement;
+      parent.querySelector('.grid-view-btn').classList.add('active');
+      parent.querySelector('.table-view-btn').classList.remove('active');
+      
+      renderAll();
+    });
+  });
+  
+  document.querySelectorAll('.table-view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.targetTab;
+      state.viewModes[tab] = 'table';
+      
+      const parent = btn.parentElement;
+      parent.querySelector('.table-view-btn').classList.add('active');
+      parent.querySelector('.grid-view-btn').classList.remove('active');
+      
+      renderAll();
+    });
+  });
+}
+
+// Toast Notifications Helper
+function showToast(type, message) {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
+  
+  let iconClass = 'fa-circle-info';
+  if (type === 'success') iconClass = 'fa-circle-check';
+  else if (type === 'error') iconClass = 'fa-circle-xmark';
+  else if (type === 'warning') iconClass = 'fa-triangle-exclamation';
+  
+  toast.innerHTML = `
+    <i class="fa-solid ${iconClass} toast-icon"></i>
+    <div class="toast-message">${message}</div>
+  `;
+  
+  container.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'fadeOut 0.3s forwards';
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
+  }, 4000);
+}
+
+// Numbers Formatter
+function formatNumber(num) {
+  if (isNaN(num)) return '0';
+  if (num >= 1000) {
+    return num.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  }
+  return num.toFixed(1);
+}
+
+</script>
+</body>
+</html>
