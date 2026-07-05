@@ -18,22 +18,6 @@ function doGet(e) {
 }
 
 /**
- * Helper function to ensure 'priceUpdates' column exists in sheet header
- */
-function ensurePriceUpdatesColumn(sheet) {
-  var lastCol = sheet.getLastColumn();
-  if (lastCol === 0) return;
-  var headers = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(function(h) {
-    return h.toString().trim();
-  });
-  
-  if (headers.indexOf("priceUpdates") === -1) {
-    sheet.getRange(1, lastCol + 1).setValue("priceUpdates");
-    SpreadsheetApp.flush();
-  }
-}
-
-/**
  * Helper function to retrieve the active project sheet by GID or fall back
  */
 function getProjectSheet() {
@@ -56,7 +40,6 @@ function getProjectSheet() {
 function getProjectsData() {
   try {
     var sheet = getProjectSheet();
-    ensurePriceUpdatesColumn(sheet);
     var values = sheet.getDataRange().getValues();
     
     if (values.length < 2) {
@@ -119,10 +102,7 @@ function getProjectsData() {
 function saveProject(projectData) {
   try {
     var sheet = getProjectSheet();
-    ensurePriceUpdatesColumn(sheet);
     var values = sheet.getDataRange().getValues();
-    
-    // Normalize headers
     var headers = values[0].map(function(h) { 
       return h.toString().trim(); 
     });
@@ -161,26 +141,6 @@ function saveProject(projectData) {
       var nextNum = maxNum + 1;
       projectId = "P-" + ("000" + nextNum).slice(-3); // Pads to P-007, P-008, etc.
       projectData.id = projectId;
-    }
-    
-    // If image field is base64 image data from upload, save it to Google Drive
-    if (projectData.image && projectData.image.indexOf("data:image/") === 0) {
-      try {
-        var parts = projectData.image.split(",");
-        var mimeType = parts[0].match(/:(.*?);/)[1];
-        var base64Data = parts[1];
-        var extension = mimeType.split("/")[1] || "png";
-        var fileName = "SolarTrack_" + (projectData["Project code"] || projectId) + "_" + new Date().getTime() + "." + extension;
-        
-        var blob = Utilities.newBlob(Utilities.base64Decode(base64Data), mimeType, fileName);
-        var file = DriveApp.createFile(blob);
-        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        
-        projectData.image = file.getUrl();
-      } catch (fileError) {
-        // Log error but proceed to save project
-        console.error("Google Drive image upload failed: " + fileError.toString());
-      }
     }
     
     // Construct the row to write matching the exact headers in the spreadsheet

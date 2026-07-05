@@ -58,11 +58,6 @@ function build() {
   fs.writeFileSync(htmlDistPath, htmlContent, 'utf8');
   console.log('Written compiled dist/index.html');
 
-  // 7. Also write compiled file to root index.html (for GitHub Pages hosting)
-  const htmlRootPath = path.join(__dirname, 'index.html');
-  fs.writeFileSync(htmlRootPath, htmlContent, 'utf8');
-  console.log('Written compiled root index.html');
-
   console.log('Build completed successfully!');
 }
 

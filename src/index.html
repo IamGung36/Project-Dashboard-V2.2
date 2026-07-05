@@ -34,13 +34,9 @@
           <i class="fa-solid fa-chart-pie nav-icon"></i>
           <span>Overview</span>
         </a>
-        <a href="#" class="nav-item" data-tab="portfolio">
-          <i class="fa-solid fa-award nav-icon"></i>
-          <span>Portfolio (Awarded)</span>
-        </a>
-        <a href="#" class="nav-item" data-tab="underdevelopment">
-          <i class="fa-solid fa-person-digging nav-icon"></i>
-          <span>Underdevelopment</span>
+        <a href="#" class="nav-item" data-tab="projects">
+          <i class="fa-solid fa-list-check nav-icon"></i>
+          <span>Projects</span>
         </a>
         <a href="#" class="nav-item" data-tab="map-view">
           <i class="fa-solid fa-map-location-dot nav-icon"></i>
@@ -72,10 +68,7 @@
         <div class="topbar-actions">
           <div class="search-box">
             <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            <input type="text" id="global-search" placeholder="Search projects..." list="project-names-datalist">
-            <datalist id="project-names-datalist">
-              <!-- Autocomplete project names populated dynamically -->
-            </datalist>
+            <input type="text" id="global-search" placeholder="Search projects, codes, engineers...">
           </div>
           <button class="btn btn-secondary" id="btn-sync" title="Synchronize with Google Sheet">
             <i class="fa-solid fa-arrows-rotate" id="sync-icon"></i>
@@ -155,117 +148,57 @@
           </div>
         </section>
         
-        <!-- ================= PORTFOLIO TAB (AWARDED PROJECTS) ================= -->
-        <section id="tab-portfolio" class="tab-pane">
+        <!-- ================= PROJECTS TAB ================= -->
+        <section id="tab-projects" class="tab-pane">
           <!-- Filters bar -->
           <div class="filters-bar glass-panel">
             <div class="filter-group">
-              <label for="portfolio-filter-region">Region</label>
-              <select id="portfolio-filter-region" class="form-control filter-region">
+              <label for="filter-region">Region</label>
+              <select id="filter-region" class="form-control">
                 <option value="All">All Regions</option>
               </select>
             </div>
             
             <div class="filter-group">
-              <label for="portfolio-filter-engineer">BD Engineer</label>
-              <select id="portfolio-filter-engineer" class="form-control filter-engineer">
-                <option value="All">All Engineers</option>
-              </select>
-            </div>
-            
-            <div class="view-toggle-group">
-              <button class="btn btn-icon-only active grid-view-btn" data-target-tab="portfolio" title="Card View">
-                <i class="fa-solid fa-grip"></i>
-              </button>
-              <button class="btn btn-icon-only table-view-btn" data-target-tab="portfolio" title="Table View">
-                <i class="fa-solid fa-list"></i>
-              </button>
-            </div>
-          </div>
-          
-          <!-- Grid & Table containers -->
-          <div id="portfolio-grid-container" class="projects-cards-grid mt-4">
-            <!-- Grid cards -->
-          </div>
-          <div id="portfolio-table-container" class="table-responsive glass-panel mt-4 d-none">
-            <table class="project-table">
-              <thead>
-                <tr>
-                  <th>Code</th>
-                  <th>Project Name</th>
-                  <th>Region</th>
-                  <th>BD Engineer</th>
-                  <th>Solar (kWp)</th>
-                  <th>BESS (kWh)</th>
-                  <th>Status</th>
-                  <th>Stage</th>
-                  <th>Deadline</th>
-                  <th>Progress</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody id="portfolio-table-body">
-                <!-- Rows -->
-              </tbody>
-            </table>
-          </div>
-          
-          <div class="empty-state d-none" id="portfolio-empty-state">
-            <i class="fa-solid fa-circle-exclamation empty-icon"></i>
-            <h3>No Portfolio Projects Found</h3>
-            <p>Try adjusting your search query or filters.</p>
-          </div>
-        </section>
-        
-        <!-- ================= UNDERDEVELOPMENT TAB (PROJECT OVERVIEW) ================= -->
-        <section id="tab-underdevelopment" class="tab-pane">
-          <!-- Filters bar -->
-          <div class="filters-bar glass-panel">
-            <div class="filter-group">
-              <label for="underdev-filter-region">Region</label>
-              <select id="underdev-filter-region" class="form-control filter-region">
-                <option value="All">All Regions</option>
-              </select>
-            </div>
-            
-            <div class="filter-group">
-              <label for="underdev-filter-status">Work Status</label>
-              <select id="underdev-filter-status" class="form-control filter-status">
+              <label for="filter-status">Status</label>
+              <select id="filter-status" class="form-control">
                 <option value="All">All Statuses</option>
                 <option value="In Progress">In Progress</option>
                 <option value="Standby">Standby</option>
+                <option value="Completed">Completed</option>
               </select>
             </div>
             
             <div class="filter-group">
-              <label for="underdev-filter-engineer">BD Engineer</label>
-              <select id="underdev-filter-engineer" class="form-control filter-engineer">
+              <label for="filter-engineer">Engineer</label>
+              <select id="filter-engineer" class="form-control">
                 <option value="All">All Engineers</option>
               </select>
             </div>
             
             <div class="view-toggle-group">
-              <button class="btn btn-icon-only active grid-view-btn" data-target-tab="underdevelopment" title="Card View">
+              <button class="btn btn-icon-only active" id="view-grid-toggle" title="Card View">
                 <i class="fa-solid fa-grip"></i>
               </button>
-              <button class="btn btn-icon-only table-view-btn" data-target-tab="underdevelopment" title="Table View">
+              <button class="btn btn-icon-only" id="view-table-toggle" title="Table View">
                 <i class="fa-solid fa-list"></i>
               </button>
             </div>
           </div>
           
-          <!-- Grid & Table containers -->
-          <div id="underdev-grid-container" class="projects-cards-grid mt-4">
-            <!-- Grid cards -->
+          <!-- Projects List Container -->
+          <div id="projects-grid-container" class="projects-cards-grid mt-4">
+            <!-- Project cards dynamically rendered here -->
           </div>
-          <div id="underdev-table-container" class="table-responsive glass-panel mt-4 d-none">
+          
+          <div id="projects-table-container" class="table-responsive glass-panel mt-4 d-none">
             <table class="project-table">
               <thead>
                 <tr>
                   <th>Code</th>
                   <th>Project Name</th>
                   <th>Region</th>
-                  <th>BD Engineer</th>
+                  <th>Engineer</th>
                   <th>Solar (kWp)</th>
                   <th>BESS (kWh)</th>
                   <th>Status</th>
@@ -275,15 +208,16 @@
                   <th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="underdev-table-body">
-                <!-- Rows -->
+              <tbody id="projects-table-body">
+                <!-- Project rows dynamically rendered here -->
               </tbody>
             </table>
           </div>
           
-          <div class="empty-state d-none" id="underdev-empty-state">
+          <!-- Empty State -->
+          <div class="empty-state d-none" id="projects-empty-state">
             <i class="fa-solid fa-circle-exclamation empty-icon"></i>
-            <h3>No Underdevelopment Projects Found</h3>
+            <h3>No Projects Found</h3>
             <p>Try adjusting your search query or filters.</p>
           </div>
         </section>
@@ -299,226 +233,219 @@
     </main>
   </div>
 
-  <!-- ================= UPDATE PROJECT DETAILS MODAL ================= -->
+  <!-- ================= ADD / EDIT PROJECT MODAL ================= -->
   <div class="modal-backdrop" id="project-modal">
-    <div class="modal-content glass-panel max-w-4xl" style="height: 90vh;">
+    <div class="modal-content glass-panel max-w-4xl">
       <div class="modal-header">
-        <h2 id="modal-title"><i class="fa-solid fa-pen-to-square"></i> Update Project Details</h2>
+        <h2 id="modal-title">Add New Project</h2>
         <button class="modal-close" id="btn-close-modal">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
       
-      <form id="project-form" style="display: flex; flex-direction: column; height: calc(100% - 60px);">
+      <form id="project-form">
         <input type="hidden" id="form-project-id">
         
-        <div class="modal-body" style="overflow-y: auto; padding: 1.5rem 2rem;">
-          
-          <!-- Row 1: Code & Name -->
-          <div class="form-grid mb-3">
-            <div class="form-group">
-              <label for="form-code">Project Code (ReadOnly)</label>
-              <input type="text" id="form-code" class="form-control" readonly style="background-color: rgba(255,255,255,0.03); cursor: not-allowed; opacity: 0.8;">
-            </div>
-            
-            <div class="form-group">
-              <label for="form-name">Project Name <span class="required">*</span></label>
-              <input type="text" id="form-name" class="form-control" required placeholder="Enter project name">
-            </div>
+        <div class="modal-body">
+          <div class="form-tabs">
+            <button type="button" class="form-tab-btn active" data-form-tab="basic-info">Basic Info</button>
+            <button type="button" class="form-tab-btn" data-form-tab="technical-specs">Technical Specs</button>
+            <button type="button" class="form-tab-btn" data-form-tab="deliverables-tab">Deliverables</button>
+            <button type="button" class="form-tab-btn" data-form-tab="milestones-tab">Dates & Notes</button>
           </div>
           
-          <!-- Row 2: Region, BD Engineer, Investor, Business Type -->
-          <div class="form-grid mb-3" style="grid-template-columns: repeat(4, 1fr);">
-            <div class="form-group">
-              <label for="form-region">Region <span class="required">*</span></label>
-              <select id="form-region" class="form-control" required>
-                <option value="">Select Region</option>
-                <option value="Central">Central</option>
-                <option value="North">North</option>
-                <option value="South">South</option>
-                <option value="East">East</option>
-                <option value="West">West</option>
-                <option value="Northeast">Northeast</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="form-engineer">BD Engineer <span class="required">*</span></label>
-              <select id="form-engineer" class="form-control" required>
-                <option value="Gung">Gung (BD Engineer)</option>
-                <option value="Hone">Hone (BD Engineer)</option>
-                <option value="Golf">Golf (BD Engineer)</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="form-investor">Investor</label>
-              <select id="form-investor" class="form-control">
-                <option value="GPSC">GPSC</option>
-                <option value="PTT">PTT</option>
-                <option value="GC">GC</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="form-business-type">Business Type</label>
-              <select id="form-business-type" class="form-control">
-                <option value="EPC">EPC</option>
-                <option value="PPA">PPA</option>
-                <option value="Consultancy">Consultancy</option>
-              </select>
-            </div>
-          </div>
-          
-          <!-- Row 3: Client -->
-          <div class="form-group mb-4">
-            <label for="form-client">Client</label>
-            <input type="text" id="form-client" class="form-control" placeholder="Client Name">
-          </div>
-          
-          <hr class="form-divider mb-4">
-          
-          <!-- Section 2: Installation Systems & Capacity -->
-          <div class="systems-section mb-4">
-            <h3 class="section-title mb-3" style="font-size: 1rem; color: #fff; font-weight: 600;"><i class="fa-solid fa-solar-panel"></i> Installation Systems & Capacity (MW)</h3>
-            <div class="systems-grid" id="form-systems-checkbox-list">
-              <!-- Checkbox items dynamically rendered here -->
-            </div>
-            
-            <button type="button" class="btn btn-sm btn-secondary mt-3" id="btn-add-system-type">
-              <i class="fa-solid fa-plus"></i> Add New System Type
-            </button>
-          </div>
-          
-          <hr class="form-divider mb-4">
-          
-          <!-- Section 3: Coordinates, Maps, Deadline, Stage, Status -->
-          <div class="form-grid mb-3" style="grid-template-columns: 1fr 1.5fr 1fr;">
-            <div class="form-group">
-              <label for="form-coordinates">Coordinates (Latitude, Longitude)</label>
-              <input type="text" id="form-coordinates" class="form-control" placeholder="e.g. 13.013062, 101.135042">
-            </div>
-            
-            <div class="form-group">
-              <label for="form-maps-link">Google Maps Link</label>
-              <input type="url" id="form-maps-link" class="form-control" placeholder="https://maps.app.goo.gl/...">
-            </div>
-            
-            <div class="form-group">
-              <label for="form-deadline">Project Deadline <span class="required">*</span></label>
-              <input type="date" id="form-deadline" class="form-control" required>
-            </div>
-          </div>
-          
-          <div class="form-grid mb-4" style="grid-template-columns: 1fr 1fr;">
-            <div class="form-group">
-              <label for="form-stage">Development Stage <span class="required">*</span></label>
-              <select id="form-stage" class="form-control" required>
-                <option value="Underdevelop">Underdevelop</option>
-                <option value="Detailed Design">Detailed Design</option>
-                <option value="Procurement">Procurement</option>
-                <option value="Construction">Construction</option>
-                <option value="COD">COD</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="form-status">Work Status <span class="required">*</span></label>
-              <select id="form-status" class="form-control" required>
-                <option value="Standby">Standby</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Completed">Complete</option>
-              </select>
-            </div>
-          </div>
-          
-          <hr class="form-divider mb-4">
-          
-          <!-- Section 4: Project Image -->
-          <div class="image-upload-section mb-4">
-            <h3 class="section-title mb-3" style="font-size: 1rem; color: #fff; font-weight: 600;"><i class="fa-regular fa-image"></i> Project Image</h3>
-            <div class="form-grid mb-3">
+          <!-- Tab 1: Basic Info -->
+          <div class="form-tab-content active" id="form-tab-basic-info">
+            <div class="form-grid">
               <div class="form-group">
-                <label for="form-image-file">Upload Image File</label>
-                <input type="file" id="form-image-file" class="form-control" accept="image/*">
+                <label for="form-code">Project Code <span class="required">*</span></label>
+                <input type="text" id="form-code" class="form-control" placeholder="e.g. G26-007" required>
               </div>
+              
+              <div class="form-group col-span-2">
+                <label for="form-name">Project Name <span class="required">*</span></label>
+                <input type="text" id="form-name" class="form-control" placeholder="Enter descriptive project name" required>
+              </div>
+              
               <div class="form-group">
-                <label for="form-image-url">Or Image URL</label>
-                <input type="url" id="form-image-url" class="form-control" placeholder="https://example.com/image.jpg">
+                <label for="form-region">Region <span class="required">*</span></label>
+                <select id="form-region" class="form-control" required>
+                  <option value="">Select Region</option>
+                  <option value="Central">Central</option>
+                  <option value="North">North</option>
+                  <option value="South">South</option>
+                  <option value="East">East</option>
+                  <option value="West">West</option>
+                  <option value="Northeast">Northeast</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="form-engineer">Engineer Name <span class="required">*</span></label>
+                <input type="text" id="form-engineer" class="form-control" placeholder="e.g. Gung" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="form-engineer-id">Engineer ID <span class="required">*</span></label>
+                <input type="text" id="form-engineer-id" class="form-control" placeholder="e.g. M-001" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="form-business-type">Business Type</label>
+                <select id="form-business-type" class="form-control">
+                  <option value="EPC">EPC</option>
+                  <option value="PPA">PPA</option>
+                  <option value="Consultancy">Consultancy</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="form-investor">Investor</label>
+                <input type="text" id="form-investor" class="form-control" placeholder="e.g. GPSC, GC">
+              </div>
+              
+              <div class="form-group">
+                <label for="form-client">Client</label>
+                <input type="text" id="form-client" class="form-control" placeholder="Client Name">
               </div>
             </div>
-            
-            <div class="image-preview-wrapper p-3 glass-panel">
-              <span class="preview-label mb-2 d-block text-xs" style="color: var(--text-muted);"><i class="fa-solid fa-eye"></i> Current Image Preview</span>
-              <div class="image-preview-container" style="display: flex; justify-content: center; align-items: center; min-height: 140px; background-color: rgba(0,0,0,0.2); border-radius: var(--border-radius-md); border: 1px dashed var(--border-color);">
-                <img id="form-image-preview" src="" alt="Project Preview" style="max-height: 180px; max-width: 100%; border-radius: var(--border-radius-sm); display: none;">
-                <span id="form-image-placeholder" class="text-muted text-sm">No Image Selected</span>
+          </div>
+          
+          <!-- Tab 2: Technical Specs -->
+          <div class="form-tab-content" id="form-tab-technical-specs">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="form-solar-capacity">Solar Capacity (kWp) <span class="required">*</span></label>
+                <input type="number" id="form-solar-capacity" class="form-control" step="0.01" min="0" placeholder="0.0" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="form-bess-capacity">BESS Capacity (kWh)</label>
+                <input type="number" id="form-bess-capacity" class="form-control" step="0.01" min="0" placeholder="0.0">
+              </div>
+              
+              <div class="form-group col-span-2">
+                <label for="form-systems">Systems (comma separated)</label>
+                <input type="text" id="form-systems" class="form-control" placeholder="e.g. Rooftop, Carpark, BESS, Floating">
+              </div>
+              
+              <div class="form-group">
+                <label for="form-lat">Latitude</label>
+                <input type="number" id="form-lat" class="form-control" step="0.000001" placeholder="e.g. 13.8248">
+              </div>
+              
+              <div class="form-group">
+                <label for="form-lng">Longitude</label>
+                <input type="number" id="form-lng" class="form-control" step="0.000001" placeholder="e.g. 100.6782">
+              </div>
+              
+              <div class="form-group col-span-2">
+                <label for="form-maps-link">Google Maps Link</label>
+                <input type="url" id="form-maps-link" class="form-control" placeholder="https://maps.app.goo.gl/...">
+              </div>
+              
+              <div class="form-group col-span-2">
+                <label for="form-image">Project Cover Image URL</label>
+                <input type="url" id="form-image" class="form-control" placeholder="https://images.unsplash.com/...">
               </div>
             </div>
           </div>
           
-          <hr class="form-divider mb-4">
-          
-          <!-- Section 5: Deliverables Checklist -->
-          <div class="deliverables-section mb-4">
-            <div class="panel-header-row mb-3">
-              <h3 class="section-title" style="font-size: 1rem; color: #fff; font-weight: 600;"><i class="fa-solid fa-list-check"></i> Deliverables Checklist</h3>
-              <button type="button" class="btn btn-sm btn-secondary" id="btn-add-deliverable">
-                <i class="fa-solid fa-plus"></i> Add Item
-              </button>
-            </div>
-            <div class="deliverables-header">
-              <span class="col-status">Done</span>
-              <span class="col-name">Deliverable Name</span>
-              <span class="col-hours">Hours</span>
-              <span class="col-action">Delete</span>
-            </div>
-            <div class="deliverables-list" id="form-deliverables-list">
-              <!-- Deliverable rows loaded dynamically -->
-            </div>
-          </div>
-          
-          <hr class="form-divider mb-4">
-          
-          <!-- Section 6: Price Updates (อัพเดทราคา) -->
-          <div class="price-section mb-4">
-            <div class="panel-header-row mb-3">
-              <h3 class="section-title" style="font-size: 1rem; color: #fff; font-weight: 600;"><i class="fa-solid fa-coins"></i> อัพเดทราคา (Price Updates)</h3>
-              <button type="button" class="btn btn-sm btn-secondary" id="btn-add-price-row">
-                <i class="fa-solid fa-plus"></i> เพิ่มแถวประวัติราคา
-              </button>
-            </div>
-            <div class="table-responsive glass-panel">
-              <table class="project-table price-table">
-                <thead>
-                  <tr>
-                    <th style="width: 80px; text-align: center;">ครั้งที่</th>
-                    <th>B/Wp (บาท)</th>
-                    <th>Bath (ราคารวม)</th>
-                    <th>Fx (อัตราแลกเปลี่ยน)</th>
-                    <th>PV price (USD/Wp)</th>
-                    <th style="width: 60px; text-align: center;">ลบ</th>
-                  </tr>
-                </thead>
-                <tbody id="form-price-updates-body">
-                  <!-- Price update rows loaded dynamically -->
-                </tbody>
-              </table>
+          <!-- Tab 3: Deliverables Checklist -->
+          <div class="form-tab-content" id="form-tab-deliverables-tab">
+            <div class="deliverables-section">
+              <div class="panel-header-row mb-3">
+                <h4>Checklist & Hours Estimate</h4>
+                <button type="button" class="btn btn-sm btn-secondary" id="btn-add-deliverable">
+                  <i class="fa-solid fa-plus"></i> Add Item
+                </button>
+              </div>
+              <div class="deliverables-header">
+                <span class="col-status">Done</span>
+                <span class="col-name">Deliverable Name</span>
+                <span class="col-hours">Hours</span>
+                <span class="col-action">Delete</span>
+              </div>
+              <div class="deliverables-list" id="form-deliverables-list">
+                <!-- Deliverable items with text inputs, checked checkbox and delete button -->
+              </div>
             </div>
           </div>
           
-          <hr class="form-divider mb-4">
-          
-          <!-- Row 7: Notes -->
-          <div class="form-group mb-2">
-            <label for="form-notes">General Notes</label>
-            <textarea id="form-notes" class="form-control" rows="3" placeholder="Enter notes, links, or documentation references..."></textarea>
+          <!-- Tab 4: Dates & Notes -->
+          <div class="form-tab-content" id="form-tab-milestones-tab">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="form-status">Project Status <span class="required">*</span></label>
+                <select id="form-status" class="form-control" required>
+                  <option value="Standby">Standby</option>
+                  <option value="In Progress">In Progress</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="form-stage">Project Stage <span class="required">*</span></label>
+                <select id="form-stage" class="form-control" required>
+                  <option value="Underdevelop">Underdevelop</option>
+                  <option value="Detailed Design">Detailed Design</option>
+                  <option value="Procurement">Procurement</option>
+                  <option value="Construction">Construction</option>
+                  <option value="COD">COD</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="form-deadline">Deadline Date <span class="required">*</span></label>
+                <input type="date" id="form-deadline" class="form-control" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="form-construction-date">Construction Date</label>
+                <input type="date" id="form-construction-date" class="form-control">
+              </div>
+              
+              <div class="form-group">
+                <label for="form-cod-date">COD Date</label>
+                <input type="date" id="form-cod-date" class="form-control">
+              </div>
+              
+              <div class="form-group">
+                <label for="form-pr-test">PR Test Date / Info</label>
+                <input type="text" id="form-pr-test" class="form-control" placeholder="e.g. 2026-12-01 or details">
+              </div>
+              
+              <div class="form-group">
+                <label for="form-pv">PV Module Model</label>
+                <input type="text" id="form-pv" class="form-control" placeholder="e.g. Jinko 580W">
+              </div>
+              
+              <div class="form-group">
+                <label for="form-inverter">Inverter Model</label>
+                <input type="text" id="form-inverter" class="form-control" placeholder="e.g. Huawei SUN2000">
+              </div>
+              
+              <div class="form-group col-span-2">
+                <label for="form-award-note">Award Note</label>
+                <input type="text" id="form-award-note" class="form-control" placeholder="e.g. Won via competitive bidding">
+              </div>
+              
+              <div class="form-group col-span-2">
+                <label for="form-revisions">Revisions / Version Control</label>
+                <input type="text" id="form-revisions" class="form-control" placeholder="e.g. Rev 0, Rev 1 - updated layout">
+              </div>
+              
+              <div class="form-group col-span-2">
+                <label for="form-notes">General Notes</label>
+                <textarea id="form-notes" class="form-control" rows="3" placeholder="Enter notes, links, or documentation references..."></textarea>
+              </div>
+            </div>
           </div>
           
         </div>
         
-        <div class="modal-footer" style="padding: 1rem 2rem; border-top: 1px solid var(--border-color); background-color: rgba(15, 23, 42, 0.4); display: flex; justify-content: flex-end; gap: 1rem; margin-top: auto;">
+        <div class="modal-footer">
           <button type="button" class="btn btn-secondary" id="btn-cancel-modal">Cancel</button>
           <button type="submit" class="btn btn-primary" id="btn-save-project">Save Project</button>
         </div>

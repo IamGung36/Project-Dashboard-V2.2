@@ -8,21 +8,12 @@ const state = {
   projects: [],
   filters: {
     search: '',
-    portfolio: {
-      region: 'All',
-      engineer: 'All'
-    },
-    underdevelopment: {
-      region: 'All',
-      status: 'All',
-      engineer: 'All'
-    }
+    region: 'All',
+    status: 'All',
+    engineer: 'All'
   },
   activeTab: 'overview',
-  viewModes: {
-    portfolio: 'grid',
-    underdevelopment: 'grid'
-  },
+  viewMode: 'grid',
   maps: {
     overview: null,
     fullScreen: null
@@ -49,7 +40,7 @@ const MOCK_PROJECTS = [
     "businessType": "EPC",
     "investor": "GC",
     "client": "Land and Houses",
-    "systems": '[{"type":"Carpark","capacity":0.0018}]',
+    "systems": "Carpark",
     "Solar capacity (kWp)": 1.8,
     "BESS capacity (kWh)": 0,
     "lat": 13.8248,
@@ -67,8 +58,7 @@ const MOCK_PROJECTS = [
     "pv": "",
     "inverter": "",
     "awardNote": "",
-    "revisions": "",
-    "priceUpdates": '[{"bWp":15.76,"bath":15760000.00,"fx":32.30,"pvPrice":0.11}]'
+    "revisions": ""
   },
   {
     "id": "P-002",
@@ -80,7 +70,7 @@ const MOCK_PROJECTS = [
     "businessType": "EPC",
     "investor": "Other",
     "client": "Samui Resort Association",
-    "systems": '[{"type":"Rooftop","capacity":0.005},{"type":"BESS","capacity":0.001}]',
+    "systems": "Rooftop,BESS",
     "Solar capacity (kWp)": 5.0,
     "BESS capacity (kWh)": 1.0,
     "lat": 9.512,
@@ -98,8 +88,7 @@ const MOCK_PROJECTS = [
     "pv": "",
     "inverter": "",
     "awardNote": "",
-    "revisions": "",
-    "priceUpdates": '[]'
+    "revisions": ""
   },
   {
     "id": "P-003",
@@ -111,7 +100,7 @@ const MOCK_PROJECTS = [
     "businessType": "PPA",
     "investor": "GPSC",
     "client": "Northern Agriculture Ltd",
-    "systems": '[{"type":"Farm","capacity":0.0085}]',
+    "systems": "Farm",
     "Solar capacity (kWp)": 8.5,
     "BESS capacity (kWh)": 0,
     "lat": 18.7883,
@@ -129,8 +118,7 @@ const MOCK_PROJECTS = [
     "pv": "",
     "inverter": "",
     "awardNote": "",
-    "revisions": "",
-    "priceUpdates": '[]'
+    "revisions": ""
   },
   {
     "id": "P-004",
@@ -142,7 +130,7 @@ const MOCK_PROJECTS = [
     "businessType": "PPA",
     "investor": "PTT",
     "client": "Amata City Rayong",
-    "systems": '[{"type":"Floating","capacity":0.0125},{"type":"Carpark","capacity":0.005}]',
+    "systems": "Floating,Carpark",
     "Solar capacity (kWp)": 17.5,
     "BESS capacity (kWh)": 0,
     "lat": 13.0125,
@@ -160,8 +148,7 @@ const MOCK_PROJECTS = [
     "pv": "",
     "inverter": "",
     "awardNote": "",
-    "revisions": "",
-    "priceUpdates": '[]'
+    "revisions": ""
   },
   {
     "id": "P-005",
@@ -173,7 +160,7 @@ const MOCK_PROJECTS = [
     "businessType": "EPC",
     "investor": "GPSC",
     "client": "Bangkok Plaza Corp",
-    "systems": '[{"type":"Rooftop","capacity":5.0},{"type":"BESS","capacity":3.0}]',
+    "systems": "Rooftop",
     "Solar capacity (kWp)": 5000,
     "BESS capacity (kWh)": 3000,
     "lat": 13.9257,
@@ -191,8 +178,7 @@ const MOCK_PROJECTS = [
     "pv": "",
     "inverter": "",
     "awardNote": "",
-    "revisions": "",
-    "priceUpdates": '[]'
+    "revisions": ""
   },
   {
     "id": "P-006",
@@ -204,7 +190,7 @@ const MOCK_PROJECTS = [
     "businessType": "EPC",
     "investor": "GPSC",
     "client": "Phitsanulok Provincial Hospital",
-    "systems": '[{"type":"Floating","capacity":1.0}]',
+    "systems": "Floating",
     "Solar capacity (kWp)": 1000,
     "BESS capacity (kWh)": 0,
     "lat": 18.785,
@@ -213,8 +199,8 @@ const MOCK_PROJECTS = [
     "image": "https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&auto=format&fit=crop&q=60",
     "deliverables": '[]',
     "notes": "Pending environmental impact report.",
-    "status": "Completed",
-    "stage": "COD",
+    "status": "In Progress",
+    "stage": "Underdevelop",
     "deadline": "2026-06-29",
     "constructionDate": "",
     "codDate": "",
@@ -222,8 +208,7 @@ const MOCK_PROJECTS = [
     "pv": "",
     "inverter": "",
     "awardNote": "",
-    "revisions": "",
-    "priceUpdates": '[]'
+    "revisions": ""
   }
 ];
 
@@ -232,22 +217,11 @@ function isGAS() {
   return typeof google !== 'undefined' && typeof google.script !== 'undefined';
 }
 
-// Escape HTML utility to prevent XSS in dynamic DOM mapping
-function escapeHtml(unsafe) {
-  if (!unsafe) return '';
-  return unsafe
-    .toString()
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 // Initialize App
 document.addEventListener('DOMContentLoaded', () => {
   setupNavigation();
   setupFilters();
+  setupFormTabs();
   setupEventListeners();
   
   // Set Environment Status indicator
@@ -295,15 +269,11 @@ function setupNavigation() {
       if (tabName === 'overview') {
         pageTitle.innerText = 'Dashboard Overview';
         pageSubtitle.innerText = 'Real-time solar project metrics and statuses';
+        // Redraw maps and charts to fit container
         setTimeout(refreshOverviewTabWidgets, 100);
-      } else if (tabName === 'portfolio') {
-        pageTitle.innerText = 'Portfolio (Awarded Projects)';
-        pageSubtitle.innerText = 'Manage and filter successfully awarded and COD projects';
-        renderAll();
-      } else if (tabName === 'underdevelopment') {
-        pageTitle.innerText = 'Project Overview (Underdevelopment)';
-        pageSubtitle.innerText = 'Track and update projects currently under development';
-        renderAll();
+      } else if (tabName === 'projects') {
+        pageTitle.innerText = 'Project Catalog';
+        pageSubtitle.innerText = 'Filter, edit, and manage individual project profiles';
       } else if (tabName === 'map-view') {
         pageTitle.innerText = 'Interactive Map';
         pageSubtitle.innerText = 'Visualise all solar sites across Thailand';
@@ -377,27 +347,8 @@ function loadFallbackData() {
 
 // Process data and execute all renderings
 function processAndRender() {
-  updateAutocompleteDatalist();
   updateFiltersDropdowns();
   renderAll();
-}
-
-// Populate datalist with existing project names for search autocomplete suggestions
-function updateAutocompleteDatalist() {
-  const datalist = document.getElementById('project-names-datalist');
-  if (!datalist) return;
-  
-  const names = new Set();
-  state.projects.forEach(p => {
-    if (p.name) names.add(p.name);
-  });
-  
-  let html = '';
-  Array.from(names).sort().forEach(name => {
-    html += `<option value="${escapeHtml(name)}">`;
-  });
-  
-  datalist.innerHTML = html;
 }
 
 // Calculate progress percent from deliverables JSON array
@@ -416,7 +367,9 @@ function calculateProgress(deliverablesJson) {
 
 // Recalculates metrics and updates DOM
 function renderAll() {
-  // Update general KPI metrics from all projects
+  const filtered = getFilteredProjects();
+  
+  // 1. Render KPI Metrics
   const totalProjects = state.projects.length;
   let totalSolar = 0;
   let totalBess = 0;
@@ -424,6 +377,7 @@ function renderAll() {
   let progressCount = 0;
   
   state.projects.forEach(p => {
+    // Handle capacity column names carefully due to trailing space in sheet
     const solarVal = parseFloat(p["Solar capacity (kWp) "] || p["Solar capacity (kWp)"] || 0);
     const bessVal = parseFloat(p["BESS capacity (kWh)"] || p["BESS capacity"] || 0);
     
@@ -442,37 +396,25 @@ function renderAll() {
   document.getElementById('kpi-bess-capacity').innerHTML = `${formatNumber(totalBess)} <span class="unit">kWh</span>`;
   document.getElementById('kpi-avg-progress').innerText = `${avgProgress}%`;
   
-  // Render overview charts & overview maps
+  // 2. Render Project Catalog Views (Grid & Table)
+  renderProjectsGrid(filtered);
+  renderProjectsTable(filtered);
+  
+  // 3. Render Widgets (Overview Map, Charts)
   initOverviewMap();
   renderCharts();
   
-  // Render Portfolio and Underdevelopment Tabs
-  if (state.activeTab === 'portfolio') {
-    const portfolioFiltered = getFilteredPortfolioProjects();
-    renderTabContent('portfolio', portfolioFiltered);
-  } else if (state.activeTab === 'underdevelopment') {
-    const underdevFiltered = getFilteredUnderdevelopmentProjects();
-    renderTabContent('underdevelopment', underdevFiltered);
-  } else if (state.activeTab === 'map-view') {
+  // If map tab is active, reload fullscreen map
+  if (state.activeTab === 'map-view') {
     initFullScreenMap();
   }
 }
 
-// Check if a project is categorized as Portfolio (Awarded)
-function isPortfolioProject(p) {
-  return p.stage === 'COD' || p.status === 'Completed' || p.status === 'Complete';
-}
-
-// Get filtered Portfolio projects list
-function getFilteredPortfolioProjects() {
-  const query = state.filters.search.toLowerCase().trim();
-  const region = state.filters.portfolio.region;
-  const engineer = state.filters.portfolio.engineer;
-  
+// Filter projects list based on UI inputs
+function getFilteredProjects() {
   return state.projects.filter(p => {
-    if (!isPortfolioProject(p)) return false;
-    
     // Search filter
+    const query = state.filters.search.toLowerCase().trim();
     const matchesSearch = !query || 
       (p.name && p.name.toLowerCase().includes(query)) ||
       (p.id && p.id.toLowerCase().includes(query)) ||
@@ -480,42 +422,16 @@ function getFilteredPortfolioProjects() {
       (p.engineer && p.engineer.toLowerCase().includes(query)) ||
       (p.client && p.client.toLowerCase().includes(query));
       
-    // Dropdowns
-    const matchesRegion = region === 'All' || p.region === region;
-    const matchesEngineer = engineer === 'All' || p.engineer === engineer;
-    
-    return matchesSearch && matchesRegion && matchesEngineer;
-  });
-}
-
-// Get filtered Underdevelopment projects list
-function getFilteredUnderdevelopmentProjects() {
-  const query = state.filters.search.toLowerCase().trim();
-  const region = state.filters.underdevelopment.region;
-  const status = state.filters.underdevelopment.status;
-  const engineer = state.filters.underdevelopment.engineer;
-  
-  return state.projects.filter(p => {
-    if (isPortfolioProject(p)) return false;
-    
-    // Search filter
-    const matchesSearch = !query || 
-      (p.name && p.name.toLowerCase().includes(query)) ||
-      (p.id && p.id.toLowerCase().includes(query)) ||
-      (p["Project code"] && p["Project code"].toLowerCase().includes(query)) ||
-      (p.engineer && p.engineer.toLowerCase().includes(query)) ||
-      (p.client && p.client.toLowerCase().includes(query));
-      
-    // Dropdowns
-    const matchesRegion = region === 'All' || p.region === region;
-    const matchesStatus = status === 'All' || p.status === status;
-    const matchesEngineer = engineer === 'All' || p.engineer === engineer;
+    // Dropdowns filters
+    const matchesRegion = state.filters.region === 'All' || p.region === state.filters.region;
+    const matchesStatus = state.filters.status === 'All' || p.status === state.filters.status;
+    const matchesEngineer = state.filters.engineer === 'All' || p.engineer === state.filters.engineer;
     
     return matchesSearch && matchesRegion && matchesStatus && matchesEngineer;
   });
 }
 
-// Generate unique filters for both dropdown tables
+// Generate unique filter dropdown options
 function updateFiltersDropdowns() {
   const regions = new Set();
   const engineers = new Set();
@@ -525,67 +441,143 @@ function updateFiltersDropdowns() {
     if (p.engineer) engineers.add(p.engineer);
   });
   
-  const rSorted = Array.from(regions).sort();
-  const engSorted = Array.from(engineers).sort();
+  const regionDropdown = document.getElementById('filter-region');
+  const engineerDropdown = document.getElementById('filter-engineer');
   
-  // Update Portfolio filters
-  const portRegion = document.getElementById('portfolio-filter-region');
-  const portEng = document.getElementById('portfolio-filter-engineer');
+  // Save active selections
+  const currentRegion = state.filters.region;
+  const currentEngineer = state.filters.engineer;
   
-  const savedPortReg = state.filters.portfolio.region;
-  const savedPortEng = state.filters.portfolio.engineer;
+  // Reset
+  regionDropdown.innerHTML = '<option value="All">All Regions</option>';
+  engineerDropdown.innerHTML = '<option value="All">All Engineers</option>';
   
-  portRegion.innerHTML = '<option value="All">All Regions</option>';
-  portEng.innerHTML = '<option value="All">All Engineers</option>';
+  Array.from(regions).sort().forEach(r => {
+    regionDropdown.innerHTML += `<option value="${r}">${r}</option>`;
+  });
   
-  rSorted.forEach(r => portRegion.innerHTML += `<option value="${r}">${r}</option>`);
-  engSorted.forEach(e => portEng.innerHTML += `<option value="${e}">${e}</option>`);
+  Array.from(engineers).sort().forEach(eng => {
+    engineerDropdown.innerHTML += `<option value="${eng}">${eng}</option>`;
+  });
   
-  portRegion.value = rSorted.includes(savedPortReg) ? savedPortReg : 'All';
-  portEng.value = engSorted.includes(savedPortEng) ? savedPortEng : 'All';
-  
-  // Update Underdevelopment filters
-  const devRegion = document.getElementById('underdev-filter-region');
-  const devEng = document.getElementById('underdev-filter-engineer');
-  
-  const savedDevReg = state.filters.underdevelopment.region;
-  const savedDevEng = state.filters.underdevelopment.engineer;
-  
-  devRegion.innerHTML = '<option value="All">All Regions</option>';
-  devEng.innerHTML = '<option value="All">All Engineers</option>';
-  
-  rSorted.forEach(r => devRegion.innerHTML += `<option value="${r}">${r}</option>`);
-  engSorted.forEach(e => devEng.innerHTML += `<option value="${e}">${e}</option>`);
-  
-  devRegion.value = rSorted.includes(savedDevReg) ? savedDevReg : 'All';
-  devEng.value = engSorted.includes(savedDevEng) ? savedDevEng : 'All';
+  // Restore selections
+  regionDropdown.value = currentRegion;
+  engineerDropdown.value = currentEngineer;
 }
 
-// Render dynamic content for projects catalog (Portfolio or Underdev)
-function renderTabContent(tabName, list) {
-  const isPortfolio = tabName === 'portfolio';
-  const containerId = isPortfolio ? 'portfolio-grid-container' : 'underdev-grid-container';
-  const tableContainerId = isPortfolio ? 'portfolio-table-container' : 'underdev-table-container';
-  const tableBodyId = isPortfolio ? 'portfolio-table-body' : 'underdev-table-body';
-  const emptyStateId = isPortfolio ? 'portfolio-empty-state' : 'underdev-empty-state';
+// Render cards
+function renderProjectsGrid(filtered) {
+  const container = document.getElementById('projects-grid-container');
+  const emptyState = document.getElementById('projects-empty-state');
   
-  const gridContainer = document.getElementById(containerId);
-  const tableContainer = document.getElementById(tableContainerId);
-  const tbody = document.getElementById(tableBodyId);
-  const emptyState = document.getElementById(emptyStateId);
-  
-  const viewMode = state.viewModes[tabName];
-  
-  if (viewMode === 'grid') {
-    gridContainer.classList.remove('d-none');
-    tableContainer.classList.add('d-none');
-  } else {
-    gridContainer.classList.add('d-none');
-    tableContainer.classList.remove('d-none');
+  if (state.viewMode !== 'grid') {
+    container.classList.add('d-none');
+    return;
   }
   
-  if (list.length === 0) {
-    gridContainer.innerHTML = '';
+  container.classList.remove('d-none');
+  
+  if (filtered.length === 0) {
+    container.innerHTML = '';
+    emptyState.classList.remove('d-none');
+    return;
+  }
+  
+  emptyState.classList.add('d-none');
+  
+  let html = '';
+  filtered.forEach(p => {
+    const progress = calculateProgress(p.deliverables);
+    const solarVal = parseFloat(p["Solar capacity (kWp) "] || p["Solar capacity (kWp)"] || 0);
+    const bessVal = parseFloat(p["BESS capacity (kWh)"] || p["BESS capacity"] || 0);
+    
+    // Status Badge classes
+    let statusClass = 'badge-secondary';
+    if (p.status === 'In Progress') statusClass = 'badge-info';
+    else if (p.status === 'Standby') statusClass = 'badge-warning';
+    else if (p.status === 'Completed') statusClass = 'badge-success';
+    
+    const defaultImage = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&auto=format&fit=crop&q=60';
+    const bgImage = p.image || defaultImage;
+    const initial = p.engineer ? p.engineer.charAt(0).toUpperCase() : '?';
+    
+    html += `
+      <div class="project-card glass-panel">
+        <div class="project-card-image" style="background-image: url('${bgImage}')">
+          <div class="project-card-overlay">
+            <span class="project-card-code">${p["Project code"] || p.id}</span>
+            <span class="badge ${statusClass}">${p.status || 'Unknown'}</span>
+          </div>
+        </div>
+        
+        <div class="project-card-body">
+          <h3 class="project-card-title" title="${p.name}">${p.name || 'Unnamed Project'}</h3>
+          
+          <div class="project-specs-grid">
+            <div class="spec-item">
+              <span class="spec-label">Solar Capacity</span>
+              <span class="spec-val"><i class="fa-solid fa-solar-panel"></i>${solarVal} kWp</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">BESS Capacity</span>
+              <span class="spec-val"><i class="fa-solid fa-battery-three-quarters"></i>${bessVal} kWh</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Region</span>
+              <span class="spec-val"><i class="fa-solid fa-earth-asia"></i>${p.region || '-'}</span>
+            </div>
+            <div class="spec-item">
+              <span class="spec-label">Business Type</span>
+              <span class="spec-val"><i class="fa-solid fa-briefcase"></i>${p.businessType || '-'}</span>
+            </div>
+          </div>
+          
+          <div class="project-progress-container">
+            <div class="progress-info">
+              <span>Progress</span>
+              <span>${progress}%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar" style="width: ${progress}%"></div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="project-card-footer">
+          <div class="engineer-badge" title="Engineer: ${p.engineer || 'Unassigned'}">
+            <div class="engineer-avatar">${initial}</div>
+            <span>${p.engineer || 'Unassigned'}</span>
+          </div>
+          <div class="card-actions">
+            <button class="btn btn-icon-only btn-edit" onclick="openEditModal('${p.id}')" title="Edit project">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="btn btn-icon-only btn-delete" onclick="triggerDeleteProject('${p.id}')" title="Delete project" style="color: var(--danger);">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  container.innerHTML = html;
+}
+
+// Render Table Row list
+function renderProjectsTable(filtered) {
+  const container = document.getElementById('projects-table-container');
+  const tbody = document.getElementById('projects-table-body');
+  const emptyState = document.getElementById('projects-empty-state');
+  
+  if (state.viewMode !== 'table') {
+    container.classList.add('d-none');
+    return;
+  }
+  
+  container.classList.remove('d-none');
+  
+  if (filtered.length === 0) {
     tbody.innerHTML = '';
     emptyState.classList.remove('d-none');
     return;
@@ -593,146 +585,70 @@ function renderTabContent(tabName, list) {
   
   emptyState.classList.add('d-none');
   
-  // Render grid
-  if (viewMode === 'grid') {
-    let gridHtml = '';
-    list.forEach(p => {
-      const progress = calculateProgress(p.deliverables);
-      const solarVal = parseFloat(p["Solar capacity (kWp) "] || p["Solar capacity (kWp)"] || 0);
-      const bessVal = parseFloat(p["BESS capacity (kWh)"] || p["BESS capacity"] || 0);
-      
-      let statusClass = 'badge-secondary';
-      if (p.status === 'In Progress') statusClass = 'badge-info';
-      else if (p.status === 'Standby') statusClass = 'badge-warning';
-      else if (p.status === 'Completed' || p.status === 'Complete') statusClass = 'badge-success';
-      
-      const defaultImage = 'https://images.unsplash.com/photo-1509391366360-2e959784a276?w=600&auto=format&fit=crop&q=60';
-      const bgImage = p.image || defaultImage;
-      const initial = p.engineer ? p.engineer.charAt(0).toUpperCase() : '?';
-      
-      gridHtml += `
-        <div class="project-card glass-panel animate-fade-in">
-          <div class="project-card-image" style="background-image: url('${bgImage}')">
-            <div class="project-card-overlay">
-              <span class="project-card-code">${p["Project code"] || p.id}</span>
-              <span class="badge ${statusClass}">${p.status || 'Unknown'}</span>
+  let html = '';
+  filtered.forEach(p => {
+    const progress = calculateProgress(p.deliverables);
+    const solarVal = parseFloat(p["Solar capacity (kWp) "] || p["Solar capacity (kWp)"] || 0);
+    const bessVal = parseFloat(p["BESS capacity (kWh)"] || p["BESS capacity"] || 0);
+    
+    let statusClass = 'badge-secondary';
+    if (p.status === 'In Progress') statusClass = 'badge-info';
+    else if (p.status === 'Standby') statusClass = 'badge-warning';
+    else if (p.status === 'Completed') statusClass = 'badge-success';
+    
+    html += `
+      <tr>
+        <td><span class="project-card-code">${p["Project code"] || p.id}</span></td>
+        <td class="td-project-name" title="${p.name}">${p.name || 'Unnamed Project'}</td>
+        <td>${p.region || '-'}</td>
+        <td>${p.engineer || 'Unassigned'}</td>
+        <td class="td-capacity">${solarVal}</td>
+        <td class="td-capacity">${bessVal}</td>
+        <td><span class="badge ${statusClass}">${p.status || 'Unknown'}</span></td>
+        <td><span class="badge badge-secondary">${p.stage || 'Underdevelop'}</span></td>
+        <td style="white-space: nowrap;">${p.deadline || '-'}</td>
+        <td>
+          <div class="table-progress-bar">
+            <div class="progress-track" style="width: 80px;">
+              <div class="progress-bar" style="width: ${progress}%"></div>
             </div>
+            <span>${progress}%</span>
           </div>
-          
-          <div class="project-card-body">
-            <h3 class="project-card-title" title="${p.name}">${p.name || 'Unnamed Project'}</h3>
-            
-            <div class="project-specs-grid">
-              <div class="spec-item">
-                <span class="spec-label">Solar Capacity</span>
-                <span class="spec-val"><i class="fa-solid fa-solar-panel"></i>${solarVal} kWp</span>
-              </div>
-              <div class="spec-item">
-                <span class="spec-label">BESS Capacity</span>
-                <span class="spec-val"><i class="fa-solid fa-battery-three-quarters"></i>${bessVal} kWh</span>
-              </div>
-              <div class="spec-item">
-                <span class="spec-label">Region</span>
-                <span class="spec-val"><i class="fa-solid fa-earth-asia"></i>${p.region || '-'}</span>
-              </div>
-              <div class="spec-item">
-                <span class="spec-label">Business Type</span>
-                <span class="spec-val"><i class="fa-solid fa-briefcase"></i>${p.businessType || '-'}</span>
-              </div>
-            </div>
-            
-            <div class="project-progress-container">
-              <div class="progress-info">
-                <span>Progress</span>
-                <span>${progress}%</span>
-              </div>
-              <div class="progress-track">
-                <div class="progress-bar" style="width: ${progress}%"></div>
-              </div>
-            </div>
+        </td>
+        <td>
+          <div class="card-actions">
+            <button class="btn btn-icon-only btn-sm" onclick="openEditModal('${p.id}')" title="Edit">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="btn btn-icon-only btn-sm" onclick="triggerDeleteProject('${p.id}')" title="Delete" style="color: var(--danger);">
+              <i class="fa-solid fa-trash-can"></i>
+            </button>
           </div>
-          
-          <div class="project-card-footer">
-            <div class="engineer-badge" title="BD Engineer: ${p.engineer || 'Unassigned'}">
-              <div class="engineer-avatar">${initial}</div>
-              <span>${p.engineer || 'Unassigned'}</span>
-            </div>
-            <div class="card-actions">
-              <button class="btn btn-icon-only btn-edit" onclick="openEditModal('${p.id}')" title="Edit project">
-                <i class="fa-solid fa-pen-to-square"></i>
-              </button>
-              <button class="btn btn-icon-only btn-delete" onclick="triggerDeleteProject('${p.id}')" title="Delete project" style="color: var(--danger);">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
-    });
-    gridContainer.innerHTML = gridHtml;
-  } else {
-    // Render table
-    let tableHtml = '';
-    list.forEach(p => {
-      const progress = calculateProgress(p.deliverables);
-      const solarVal = parseFloat(p["Solar capacity (kWp) "] || p["Solar capacity (kWp)"] || 0);
-      const bessVal = parseFloat(p["BESS capacity (kWh)"] || p["BESS capacity"] || 0);
-      
-      let statusClass = 'badge-secondary';
-      if (p.status === 'In Progress') statusClass = 'badge-info';
-      else if (p.status === 'Standby') statusClass = 'badge-warning';
-      else if (p.status === 'Completed' || p.status === 'Complete') statusClass = 'badge-success';
-      
-      tableHtml += `
-        <tr>
-          <td><span class="project-card-code">${p["Project code"] || p.id}</span></td>
-          <td class="td-project-name" title="${p.name}">${p.name || 'Unnamed Project'}</td>
-          <td>${p.region || '-'}</td>
-          <td>${p.engineer || 'Unassigned'}</td>
-          <td class="td-capacity">${solarVal}</td>
-          <td class="td-capacity">${bessVal}</td>
-          <td><span class="badge ${statusClass}">${p.status || 'Unknown'}</span></td>
-          <td><span class="badge badge-secondary">${p.stage || 'Underdevelop'}</span></td>
-          <td style="white-space: nowrap;">${p.deadline || '-'}</td>
-          <td>
-            <div class="table-progress-bar">
-              <div class="progress-track" style="width: 80px;">
-                <div class="progress-bar" style="width: ${progress}%"></div>
-              </div>
-              <span>${progress}%</span>
-            </div>
-          </td>
-          <td>
-            <div class="card-actions">
-              <button class="btn btn-icon-only btn-sm" onclick="openEditModal('${p.id}')" title="Edit">
-                <i class="fa-solid fa-pen-to-square"></i>
-              </button>
-              <button class="btn btn-icon-only btn-sm" onclick="triggerDeleteProject('${p.id}')" title="Delete" style="color: var(--danger);">
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      `;
-    });
-    tbody.innerHTML = tableHtml;
-  }
+        </td>
+      </tr>
+    `;
+  });
+  
+  tbody.innerHTML = html;
 }
 
-// Initialize Overview Map
+// Initialize Overview Map (Renders Leaflet Map under geographic sections)
 function initOverviewMap() {
   const mapElement = document.getElementById('overview-map');
   if (!mapElement) return;
   
+  // Clear map markers if map exists
   if (state.maps.overview) {
     state.mapMarkers.overview.forEach(m => state.maps.overview.removeLayer(m));
     state.mapMarkers.overview = [];
   } else {
+    // Bangkok coordinates center default
     state.maps.overview = L.map('overview-map', {
       zoomControl: true,
       scrollWheelZoom: false
     }).setView([13.7367, 100.5231], 6);
     
+    // Add cartodb dark matter tile layer
     L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
       subdomains: 'abcd',
@@ -743,7 +659,7 @@ function initOverviewMap() {
   plotMarkers(state.maps.overview, state.mapMarkers.overview);
 }
 
-// Initialize Full-Screen Map
+// Initialize Full-Screen Map under Map View tab
 function initFullScreenMap() {
   const mapElement = document.getElementById('full-screen-map');
   if (!mapElement) return;
@@ -765,7 +681,7 @@ function initFullScreenMap() {
   plotMarkers(state.maps.fullScreen, state.mapMarkers.fullScreen);
 }
 
-// Plot Markers
+// Plot Leaflet Markers on provided map
 function plotMarkers(mapObj, markerArray) {
   let validLocationsCount = 0;
   const bounds = [];
@@ -781,7 +697,7 @@ function plotMarkers(mapObj, markerArray) {
       
       const popupHtml = `
         <div class="map-popup-card">
-          <div class="map-popup-title">${escapeHtml(p.name || 'Unnamed Project')}</div>
+          <div class="map-popup-title">${p.name || 'Unnamed Project'}</div>
           <div class="map-popup-row">
             <span>Project Code:</span>
             <strong>${p["Project code"] || p.id}</strong>
@@ -810,10 +726,10 @@ function plotMarkers(mapObj, markerArray) {
         </div>
       `;
       
-      // Determine marker color
-      let markerColor = '#64748b';
-      if (p.status === 'In Progress') markerColor = '#0ea5e9';
-      else if (p.status === 'Completed' || p.status === 'Complete') markerColor = '#10b981';
+      // Determine marker color based on status
+      let markerColor = '#64748b'; // standby / unknown (gray)
+      if (p.status === 'In Progress') markerColor = '#0ea5e9'; // primary blue
+      else if (p.status === 'Completed') markerColor = '#10b981'; // green
       
       const marker = L.circleMarker([lat, lng], {
         radius: 8,
@@ -830,25 +746,29 @@ function plotMarkers(mapObj, markerArray) {
     }
   });
   
+  // Auto zoom to fit all markers if locations exist
   if (validLocationsCount > 0 && mapObj) {
     mapObj.fitBounds(bounds, { padding: [30, 30] });
   }
 }
 
-// Render ApexCharts
+// Render ApexCharts data visualizations
 function renderCharts() {
   const stagesData = {};
   const regionsData = {};
   
   state.projects.forEach(p => {
+    // Stages count
     const stage = p.stage || 'Underdevelop';
     stagesData[stage] = (stagesData[stage] || 0) + 1;
     
+    // Regions capacity calculation
     const region = p.region || 'Unknown';
     const solarVal = parseFloat(p["Solar capacity (kWp) "] || p["Solar capacity (kWp)"] || 0);
     regionsData[region] = (regionsData[region] || 0) + (isNaN(solarVal) ? 0 : solarVal);
   });
   
+  // 1. Stage Distribution Pie Chart
   const stageLabels = Object.keys(stagesData);
   const stageSeries = Object.values(stagesData);
   
@@ -909,6 +829,7 @@ function renderCharts() {
     state.charts.stages.render();
   }
   
+  // 2. Capacity by Region Bar Chart
   const regionLabels = Object.keys(regionsData);
   const regionSeries = Object.values(regionsData).map(v => Math.round(v * 100) / 100);
   
@@ -984,15 +905,10 @@ function renderCharts() {
   }
 }
 
-// Modal Form State & Dynamic lists
+// Add/Edit Project Form Actions
 let formDeliverables = [];
-let formSystems = [];
-let formPriceUpdates = [];
-let uploadedImageBase64 = '';
 
-const STANDARD_SYSTEM_TYPES = ['Rooftop', 'Farm', 'Floating', 'Carpark', 'BESS'];
-
-// Opens Modal
+// Opens Modal to Add/Edit project
 function openEditModal(projectId = '') {
   const modal = document.getElementById('project-modal');
   const title = document.getElementById('modal-title');
@@ -1000,17 +916,16 @@ function openEditModal(projectId = '') {
   
   form.reset();
   formDeliverables = [];
-  formSystems = [];
-  formPriceUpdates = [];
-  uploadedImageBase64 = '';
   
-  // Set default placeholder image state
-  document.getElementById('form-image-preview').style.display = 'none';
-  document.getElementById('form-image-placeholder').style.display = 'block';
+  // Set basic tab active
+  document.querySelectorAll('.form-tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelector('[data-form-tab="basic-info"]').classList.add('active');
+  document.querySelectorAll('.form-tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('form-tab-basic-info').classList.add('active');
   
   if (projectId) {
     // Editing Mode
-    title.innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Update Project Details';
+    title.innerText = 'Edit Project Profile';
     const project = state.projects.find(p => p.id === projectId);
     
     if (project) {
@@ -1018,58 +933,36 @@ function openEditModal(projectId = '') {
       document.getElementById('form-code').value = project["Project code"] || '';
       document.getElementById('form-name').value = project.name || '';
       document.getElementById('form-region').value = project.region || '';
-      document.getElementById('form-engineer').value = project.engineer || 'Gung';
-      document.getElementById('form-engineer-id').value = project["id engineer"] || 'M-001';
+      document.getElementById('form-engineer').value = project.engineer || '';
+      document.getElementById('form-engineer-id').value = project["id engineer"] || '';
       document.getElementById('form-business-type').value = project.businessType || 'EPC';
-      document.getElementById('form-investor').value = project.investor || 'GPSC';
+      document.getElementById('form-investor').value = project.investor || '';
       document.getElementById('form-client').value = project.client || '';
       
-      // Coordinates mapping
-      const latVal = parseFloat(project.lat);
-      const lngVal = parseFloat(project.lng);
-      document.getElementById('form-coordinates').value = (!isNaN(latVal) && !isNaN(lngVal) && latVal !== 0) ? `${latVal}, ${lngVal}` : '';
+      const solarCapacity = parseFloat(project["Solar capacity (kWp) "] || project["Solar capacity (kWp)"] || 0);
+      const bessCapacity = parseFloat(project["BESS capacity (kWh)"] || project["BESS capacity"] || 0);
+      document.getElementById('form-solar-capacity').value = solarCapacity;
+      document.getElementById('form-bess-capacity').value = bessCapacity;
       
+      document.getElementById('form-systems').value = project.systems || '';
+      document.getElementById('form-lat').value = project.lat || '';
+      document.getElementById('form-lng').value = project.lng || '';
       document.getElementById('form-maps-link').value = project.googleMapsLink || '';
-      document.getElementById('form-image-url').value = project.image || '';
+      document.getElementById('form-image').value = project.image || '';
       
-      if (project.image) {
-        document.getElementById('form-image-preview').src = project.image;
-        document.getElementById('form-image-preview').style.display = 'block';
-        document.getElementById('form-image-placeholder').style.display = 'none';
-      }
-      
-      // Select Box mapping
-      document.getElementById('form-status').value = (project.status === 'Completed' || project.status === 'Complete') ? 'Completed' : (project.status || 'Standby');
+      document.getElementById('form-status').value = project.status || 'Standby';
       document.getElementById('form-stage').value = project.stage || 'Underdevelop';
       document.getElementById('form-deadline').value = project.deadline || '';
+      document.getElementById('form-construction-date').value = project.constructionDate || '';
+      document.getElementById('form-cod-date').value = project.codDate || '';
+      document.getElementById('form-pr-test').value = project.prTest || '';
+      document.getElementById('form-pv').value = project.pv || '';
+      document.getElementById('form-inverter').value = project.inverter || '';
+      document.getElementById('form-award-note').value = project.awardNote || '';
+      document.getElementById('form-revisions').value = project.revisions || '';
       document.getElementById('form-notes').value = project.notes || '';
       
-      // Parse systems array
-      if (project.systems) {
-        try {
-          if (project.systems.trim().startsWith('[')) {
-            formSystems = JSON.parse(project.systems);
-          } else {
-            // Comma separated fallback
-            project.systems.split(',').forEach(s => {
-              const type = s.trim();
-              if (type) {
-                let capacity = 0;
-                if (type === 'BESS') {
-                  capacity = (parseFloat(project['BESS capacity (kWh)']) || 0) / 1000;
-                } else {
-                  capacity = (parseFloat(project['Solar capacity (kWp) '] || project['Solar capacity (kWp)']) || 0) / 1000;
-                }
-                formSystems.push({ type, capacity });
-              }
-            });
-          }
-        } catch (e) {
-          formSystems = [];
-        }
-      }
-      
-      // Parse deliverables
+      // Load deliverables list
       if (project.deliverables) {
         try {
           formDeliverables = typeof project.deliverables === 'string' ? JSON.parse(project.deliverables) : project.deliverables;
@@ -1077,23 +970,13 @@ function openEditModal(projectId = '') {
           formDeliverables = [];
         }
       }
-      
-      // Parse price updates
-      if (project.priceUpdates) {
-        try {
-          formPriceUpdates = typeof project.priceUpdates === 'string' ? JSON.parse(project.priceUpdates) : project.priceUpdates;
-        } catch (e) {
-          formPriceUpdates = [];
-        }
-      }
     }
   } else {
     // Add Mode
-    title.innerHTML = '<i class="fa-solid fa-plus"></i> Add New Project Profile';
+    title.innerText = 'Add New Project Profile';
     document.getElementById('form-project-id').value = '';
-    document.getElementById('form-code').value = '';
-    
-    // Set standard deliverables
+    // Auto-generate project code/ID if we want.
+    // Set standard deliverables checklist automatically for new projects
     formDeliverables = [
       { name: "Survey Reports", hours: 4, checked: false },
       { name: "PV Layout", hours: 4, checked: false },
@@ -1104,119 +987,11 @@ function openEditModal(projectId = '') {
     ];
   }
   
-  renderFormSystems();
   renderFormDeliverables();
-  renderFormPriceUpdates();
-  
   modal.classList.add('show');
 }
 
-// Render systems checkboxes in modal form
-function renderFormSystems() {
-  const container = document.getElementById('form-systems-checkbox-list');
-  container.innerHTML = '';
-  
-  // Form list standard + any custom ones parsed
-  const activeTypes = formSystems.map(s => s.type);
-  const typesToRender = [...STANDARD_SYSTEM_TYPES];
-  
-  formSystems.forEach(s => {
-    if (!typesToRender.includes(s.type)) {
-      typesToRender.push(s.type);
-    }
-  });
-  
-  typesToRender.forEach(type => {
-    const isChecked = activeTypes.includes(type);
-    const checkedAttr = isChecked ? 'checked' : '';
-    const activeClass = isChecked ? 'active' : '';
-    const systemData = formSystems.find(s => s.type === type);
-    const capacityVal = systemData ? systemData.capacity : '';
-    
-    const row = document.createElement('div');
-    row.className = `system-checkbox-row ${activeClass}`;
-    row.innerHTML = `
-      <input type="checkbox" id="system-check-${type}" class="system-checkbox" data-type="${type}" ${checkedAttr} onchange="toggleSystemCheckbox('${type}', this.checked)">
-      <label for="system-check-${type}">${type}</label>
-      <div class="system-capacity-wrapper">
-        <input type="number" step="0.001" min="0" class="system-capacity-input" placeholder="0.0" value="${capacityVal}" oninput="updateSystemCapacity('${type}', this.value)">
-        <span class="system-capacity-unit">MW</span>
-      </div>
-    `;
-    container.appendChild(row);
-  });
-}
-
-function toggleSystemCheckbox(type, isChecked) {
-  const checkboxRow = document.getElementById(`system-check-${type}`).parentElement;
-  if (isChecked) {
-    checkboxRow.classList.add('active');
-    const existing = formSystems.find(s => s.type === type);
-    if (!existing) {
-      formSystems.push({ type: type, capacity: 0 });
-    }
-  } else {
-    checkboxRow.classList.remove('active');
-    formSystems = formSystems.filter(s => s.type !== type);
-  }
-  
-  // Checkboxes change will impact Solar capacity, recalculate prices
-  recalculatePriceTableValues();
-}
-
-function updateSystemCapacity(type, value) {
-  const numericVal = parseFloat(value) || 0;
-  const systemData = formSystems.find(s => s.type === type);
-  if (systemData) {
-    systemData.capacity = numericVal;
-  } else {
-    formSystems.push({ type: type, capacity: numericVal });
-  }
-  
-  recalculatePriceTableValues();
-}
-
-// Calculate on-the-fly Solar capacity in Watt-peak (Wp) for pricing calculations
-function calculateFormSolarCapacityWp() {
-  let solarCapacityMW = 0;
-  formSystems.forEach(s => {
-    if (s.type !== 'BESS') {
-      solarCapacityMW += s.capacity;
-    }
-  });
-  return solarCapacityMW * 1000 * 1000; // 1 MW = 1,000,000 Wp
-}
-
-// Re-computes all rows' Bath total price values based on current Solar Capacity
-function recalculatePriceTableValues() {
-  const capacityWp = calculateTotalSolarCapacityWpFromFormInputs();
-  
-  formPriceUpdates.forEach((row, idx) => {
-    if (row.bWp > 0) {
-      row.bath = row.bWp * capacityWp;
-    }
-  });
-  
-  renderFormPriceUpdates();
-}
-
-// Helper to sum current form system checkbox solar capacities
-function calculateTotalSolarCapacityWpFromFormInputs() {
-  let totalSolarMW = 0;
-  const container = document.getElementById('form-systems-checkbox-list');
-  if (!container) return 0;
-  
-  container.querySelectorAll('.system-checkbox-row').forEach(row => {
-    const check = row.querySelector('.system-checkbox');
-    const input = row.querySelector('.system-capacity-input');
-    if (check && check.checked && check.dataset.type !== 'BESS') {
-      totalSolarMW += parseFloat(input.value) || 0;
-    }
-  });
-  return totalSolarMW * 1000 * 1000;
-}
-
-// Render deliverables checklist inside edit modal
+// Renders the deliverables checklist inside edit modal
 function renderFormDeliverables() {
   const container = document.getElementById('form-deliverables-list');
   container.innerHTML = '';
@@ -1235,7 +1010,7 @@ function renderFormDeliverables() {
         <input type="checkbox" ${checkedAttr} onchange="updateFormDeliverableStatus(${index}, this.checked)">
       </div>
       <div class="col-name">
-        <input type="text" value="${escapeHtml(item.name || '')}" placeholder="Deliverable name" onchange="updateFormDeliverableName(${index}, this.value)">
+        <input type="text" value="${item.name || ''}" placeholder="Deliverable name" onchange="updateFormDeliverableName(${index}, this.value)">
       </div>
       <div class="col-hours">
         <input type="number" value="${item.hours || 0}" min="0" onchange="updateFormDeliverableHours(${index}, this.value)">
@@ -1267,89 +1042,6 @@ function removeFormDeliverable(index) {
   renderFormDeliverables();
 }
 
-// Renders the Price Updates Table inside edit modal
-function renderFormPriceUpdates() {
-  const tbody = document.getElementById('form-price-updates-body');
-  tbody.innerHTML = '';
-  
-  if (!Array.isArray(formPriceUpdates) || formPriceUpdates.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">ไม่มีข้อมูลการอัพเดทราคา กดปุ่มเพื่อเพิ่มข้อมูล</td></tr>';
-    return;
-  }
-  
-  formPriceUpdates.forEach((row, index) => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="text-align: center; font-weight: 600;">${index + 1}</td>
-      <td>
-        <input type="number" step="0.01" class="price-bWp" placeholder="0.00" value="${row.bWp || ''}" oninput="updatePriceRowBWp(${index}, this.value)">
-      </td>
-      <td>
-        <input type="number" step="1" class="price-bath" placeholder="0.00" value="${row.bath ? Math.round(row.bath) : ''}" oninput="updatePriceRowBath(${index}, this.value)">
-      </td>
-      <td>
-        <input type="number" step="0.01" class="price-fx" placeholder="32.00" value="${row.fx || ''}" oninput="updatePriceRowFx(${index}, this.value)">
-      </td>
-      <td>
-        <input type="number" step="0.01" class="price-pvPrice" placeholder="0.00" value="${row.pvPrice || ''}" oninput="updatePriceRowPV(${index}, this.value)">
-      </td>
-      <td class="col-action">
-        <button type="button" class="btn-delete-row" onclick="removePriceRow(${index})" title="Delete row">
-          <i class="fa-solid fa-trash-can"></i>
-        </button>
-      </td>
-    `;
-    tbody.appendChild(tr);
-  });
-}
-
-function updatePriceRowBWp(index, val) {
-  const numericBWp = parseFloat(val) || 0;
-  formPriceUpdates[index].bWp = numericBWp;
-  
-  // Calculate Bath: bWp * capacityWp
-  const capacityWp = calculateTotalSolarCapacityWpFromFormInputs();
-  const calculatedBath = numericBWp * capacityWp;
-  formPriceUpdates[index].bath = calculatedBath;
-  
-  // Update UI row input instantly
-  const tr = document.getElementById('form-price-updates-body').children[index];
-  if (tr) {
-    tr.querySelector('.price-bath').value = calculatedBath ? Math.round(calculatedBath) : '';
-  }
-}
-
-function updatePriceRowBath(index, val) {
-  const numericBath = parseFloat(val) || 0;
-  formPriceUpdates[index].bath = numericBath;
-  
-  // Calculate bWp: bath / capacityWp
-  const capacityWp = calculateTotalSolarCapacityWpFromFormInputs();
-  if (capacityWp > 0) {
-    const calculatedBWp = numericBath / capacityWp;
-    formPriceUpdates[index].bWp = Math.round(calculatedBWp * 100) / 100;
-    
-    // Update UI row input instantly
-    const tr = document.getElementById('form-price-updates-body').children[index];
-    if (tr) {
-      tr.querySelector('.price-bWp').value = calculatedBWp.toFixed(2);
-    }
-  }
-}
-
-function updatePriceRowFx(index, val) {
-  formPriceUpdates[index].fx = parseFloat(val) || 0;
-}
-
-function updatePriceRowPV(index, val) {
-  formPriceUpdates[index].pvPrice = parseFloat(val) || 0;
-}
-
-function removePriceRow(index) {
-  formPriceUpdates.splice(index, 1);
-  renderFormPriceUpdates();
-}
-
 // Event bindings & triggers
 function setupEventListeners() {
   // Modal Closes
@@ -1366,73 +1058,17 @@ function setupEventListeners() {
   document.getElementById('btn-add-deliverable').addEventListener('click', () => {
     formDeliverables.push({ name: '', hours: 0, checked: false });
     renderFormDeliverables();
+    // Scroll to bottom of list
     const container = document.getElementById('form-deliverables-list');
     container.scrollTop = container.scrollHeight;
   });
   
-  // Add System row
-  document.getElementById('btn-add-system-type').addEventListener('click', () => {
-    const newType = prompt("Enter new installation system type:");
-    if (newType && newType.trim() !== "") {
-      const formattedType = newType.trim();
-      const existing = formSystems.find(s => s.type.toLowerCase() === formattedType.toLowerCase());
-      if (!existing) {
-        formSystems.push({ type: formattedType, capacity: 0 });
-        renderFormSystems();
-      } else {
-        showToast('warning', 'This system type already exists.');
-      }
-    }
-  });
-  
-  // Add Price Row
-  document.getElementById('btn-add-price-row').addEventListener('click', () => {
-    formPriceUpdates.push({ bWp: 0, bath: 0, fx: 0, pvPrice: 0 });
-    renderFormPriceUpdates();
-  });
-  
-  // File Upload image preview mapping
-  const fileInput = document.getElementById('form-image-file');
-  const urlInput = document.getElementById('form-image-url');
-  
-  fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        uploadedImageBase64 = event.target.result;
-        
-        // Show preview
-        document.getElementById('form-image-preview').src = uploadedImageBase64;
-        document.getElementById('form-image-preview').style.display = 'block';
-        document.getElementById('form-image-placeholder').style.display = 'none';
-        
-        // Clear text field input
-        urlInput.value = '';
-      };
-      reader.readAsDataURL(file);
-    }
-  });
-  
-  urlInput.addEventListener('input', (e) => {
-    const urlVal = e.target.value.trim();
-    if (urlVal) {
-      uploadedImageBase64 = '';
-      document.getElementById('form-image-preview').src = urlVal;
-      document.getElementById('form-image-preview').style.display = 'block';
-      document.getElementById('form-image-placeholder').style.display = 'none';
-    } else {
-      document.getElementById('form-image-preview').style.display = 'none';
-      document.getElementById('form-image-placeholder').style.display = 'block';
-    }
-  });
-  
-  // Delete project modal events
+  // Delete project cancel & confirm
   document.getElementById('btn-close-delete-modal').addEventListener('click', closeDeleteModal);
   document.getElementById('btn-cancel-delete').addEventListener('click', closeDeleteModal);
   document.getElementById('btn-confirm-delete').addEventListener('click', executeDeleteProject);
   
-  // Sync refresh button
+  // Sync button
   document.getElementById('btn-sync').addEventListener('click', syncData);
   
   // Add project buttons
@@ -1453,79 +1089,37 @@ function saveProjectForm() {
   // Prepare project object
   const projectId = document.getElementById('form-project-id').value;
   
-  // Clean lists
+  // Ensure we serialize deliverables list as clean JSON string
   const cleanDeliverables = formDeliverables.filter(d => d.name.trim() !== '');
-  
-  // Parse coordinates
-  let lat = 0;
-  let lng = 0;
-  const coordVal = document.getElementById('form-coordinates').value.trim();
-  if (coordVal) {
-    const parts = coordVal.split(',');
-    if (parts.length === 2) {
-      lat = parseFloat(parts[0]) || 0;
-      lng = parseFloat(parts[1]) || 0;
-    }
-  }
-  
-  // Calculate total capacities from checkbox selections
-  let solarCapacitykWp = 0;
-  let bessCapacitykWh = 0;
-  const cleanSystems = [];
-  
-  const container = document.getElementById('form-systems-checkbox-list');
-  container.querySelectorAll('.system-checkbox-row').forEach(row => {
-    const checkbox = row.querySelector('.system-checkbox');
-    const input = row.querySelector('.system-capacity-input');
-    
-    if (checkbox && checkbox.checked) {
-      const type = checkbox.dataset.type;
-      const capacityMW = parseFloat(input.value) || 0;
-      cleanSystems.push({ type, capacity: capacityMW });
-      
-      if (type === 'BESS') {
-        bessCapacitykWh += capacityMW * 1000;
-      } else {
-        solarCapacitykWp += capacityMW * 1000;
-      }
-    }
-  });
-  
-  // BD Engineer and ID Engineer auto-mapping
-  const engName = document.getElementById('form-engineer').value;
-  let engId = 'M-001';
-  if (engName === 'Hone') engId = 'M-002';
-  else if (engName === 'Golf') engId = 'M-003';
-  
-  // Image URL selection
-  let finalImage = document.getElementById('form-image-url').value.trim();
-  if (uploadedImageBase64) {
-    finalImage = uploadedImageBase64;
-  }
   
   const projectData = {
     "id": projectId,
     "Project code": document.getElementById('form-code').value.trim(),
     "name": document.getElementById('form-name').value.trim(),
     "region": document.getElementById('form-region').value,
-    "engineer": engName,
-    "id engineer": engId,
+    "engineer": document.getElementById('form-engineer').value.trim(),
+    "id engineer": document.getElementById('form-engineer-id').value.trim(),
     "businessType": document.getElementById('form-business-type').value,
-    "investor": document.getElementById('form-investor').value,
+    "investor": document.getElementById('form-investor').value.trim(),
     "client": document.getElementById('form-client').value.trim(),
-    "Solar capacity (kWp) ": solarCapacitykWp,
-    "Solar capacity (kWp)": solarCapacitykWp,
-    "BESS capacity (kWh)": bessCapacitykWh,
-    "systems": JSON.stringify(cleanSystems),
-    "lat": lat,
-    "lng": lng,
+    "Solar capacity (kWp) ": parseFloat(document.getElementById('form-solar-capacity').value) || 0,
+    "BESS capacity (kWh)": parseFloat(document.getElementById('form-bess-capacity').value) || 0,
+    "systems": document.getElementById('form-systems').value.trim(),
+    "lat": parseFloat(document.getElementById('form-lat').value) || 0,
+    "lng": parseFloat(document.getElementById('form-lng').value) || 0,
     "googleMapsLink": document.getElementById('form-maps-link').value.trim(),
-    "image": finalImage,
+    "image": document.getElementById('form-image').value.trim(),
     "deliverables": JSON.stringify(cleanDeliverables),
-    "priceUpdates": JSON.stringify(formPriceUpdates),
     "status": document.getElementById('form-status').value,
     "stage": document.getElementById('form-stage').value,
     "deadline": document.getElementById('form-deadline').value,
+    "constructionDate": document.getElementById('form-construction-date').value,
+    "codDate": document.getElementById('form-cod-date').value,
+    "prTest": document.getElementById('form-pr-test').value.trim(),
+    "pv": document.getElementById('form-pv').value.trim(),
+    "inverter": document.getElementById('form-inverter').value.trim(),
+    "awardNote": document.getElementById('form-award-note').value.trim(),
+    "revisions": document.getElementById('form-revisions').value.trim(),
     "notes": document.getElementById('form-notes').value.trim()
   };
   
@@ -1538,6 +1132,7 @@ function saveProjectForm() {
         if (response.status === 'success') {
           showToast('success', 'Project details saved to Google Sheets successfully.');
           closeModal();
+          // Reload state
           syncData();
         } else {
           showToast('error', 'Failed to save: ' + response.message);
@@ -1557,11 +1152,13 @@ function saveProjectForm() {
       saveBtn.innerText = 'Save Project';
       
       if (projectId) {
+        // Edit existing
         const idx = state.projects.findIndex(p => p.id === projectId);
         if (idx !== -1) {
           state.projects[idx] = projectData;
         }
       } else {
+        // Add new (generate local ID)
         const ids = state.projects.map(p => {
           const m = p.id.match(/^P-(\d+)$/i);
           return m ? parseInt(m[1], 10) : 0;
@@ -1569,9 +1166,6 @@ function saveProjectForm() {
         const max = ids.length > 0 ? Math.max(...ids) : 0;
         const nextId = "P-" + ("000" + (max + 1)).slice(-3);
         projectData.id = nextId;
-        
-        // Auto-generate project code for mockup local testing
-        projectData["Project code"] = "G26-" + ("000" + (max + 1)).slice(-3);
         state.projects.push(projectData);
       }
       
@@ -1582,7 +1176,7 @@ function saveProjectForm() {
   }
 }
 
-// Delete Project
+// Delete Project Triggering
 let projectToDeleteId = '';
 
 function triggerDeleteProject(projectId) {
@@ -1627,6 +1221,7 @@ function executeDeleteProject() {
       })
       .deleteProject(projectToDeleteId);
   } else {
+    // Local simulation
     setTimeout(() => {
       delBtn.disabled = false;
       delBtn.innerText = 'Delete Project';
@@ -1639,63 +1234,62 @@ function executeDeleteProject() {
   }
 }
 
-// Setup Filters
+// Setup Filters binding logic
 function setupFilters() {
-  // Global search datalist mapping
+  // Global search
   document.getElementById('global-search').addEventListener('input', (e) => {
     state.filters.search = e.target.value;
     renderAll();
   });
   
-  // Portfolio tab region and engineer filters
-  document.getElementById('portfolio-filter-region').addEventListener('change', (e) => {
-    state.filters.portfolio.region = e.target.value;
-    renderAll();
-  });
-  document.getElementById('portfolio-filter-engineer').addEventListener('change', (e) => {
-    state.filters.portfolio.engineer = e.target.value;
+  // Dropdowns
+  document.getElementById('filter-region').addEventListener('change', (e) => {
+    state.filters.region = e.target.value;
     renderAll();
   });
   
-  // Underdevelopment tab region, status, and engineer filters
-  document.getElementById('underdev-filter-region').addEventListener('change', (e) => {
-    state.filters.underdevelopment.region = e.target.value;
-    renderAll();
-  });
-  document.getElementById('underdev-filter-status').addEventListener('change', (e) => {
-    state.filters.underdevelopment.status = e.target.value;
-    renderAll();
-  });
-  document.getElementById('underdev-filter-engineer').addEventListener('change', (e) => {
-    state.filters.underdevelopment.engineer = e.target.value;
+  document.getElementById('filter-status').addEventListener('change', (e) => {
+    state.filters.status = e.target.value;
     renderAll();
   });
   
-  // Set view toggles
-  document.querySelectorAll('.grid-view-btn').forEach(btn => {
+  document.getElementById('filter-engineer').addEventListener('change', (e) => {
+    state.filters.engineer = e.target.value;
+    renderAll();
+  });
+  
+  // Card/Table View Toggles
+  const gridToggle = document.getElementById('view-grid-toggle');
+  const tableToggle = document.getElementById('view-table-toggle');
+  
+  gridToggle.addEventListener('click', () => {
+    gridToggle.classList.add('active');
+    tableToggle.classList.remove('active');
+    state.viewMode = 'grid';
+    renderAll();
+  });
+  
+  tableToggle.addEventListener('click', () => {
+    tableToggle.classList.add('active');
+    gridToggle.classList.remove('active');
+    state.viewMode = 'table';
+    renderAll();
+  });
+}
+
+// Setup Form Tabs sliding/toggling inside Modal
+function setupFormTabs() {
+  const tabs = document.querySelectorAll('.form-tab-btn');
+  tabs.forEach(btn => {
     btn.addEventListener('click', () => {
-      const tab = btn.dataset.targetTab;
-      state.viewModes[tab] = 'grid';
+      tabs.forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
       
-      // Toggle active visual classes
-      const parent = btn.parentElement;
-      parent.querySelector('.grid-view-btn').classList.add('active');
-      parent.querySelector('.table-view-btn').classList.remove('active');
-      
-      renderAll();
-    });
-  });
-  
-  document.querySelectorAll('.table-view-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const tab = btn.dataset.targetTab;
-      state.viewModes[tab] = 'table';
-      
-      const parent = btn.parentElement;
-      parent.querySelector('.table-view-btn').classList.add('active');
-      parent.querySelector('.grid-view-btn').classList.remove('active');
-      
-      renderAll();
+      const tabContentId = btn.getAttribute('data-form-tab');
+      document.querySelectorAll('.form-tab-content').forEach(c => {
+        c.classList.remove('active');
+      });
+      document.getElementById(`form-tab-${tabContentId}`).classList.add('active');
     });
   });
 }
@@ -1718,6 +1312,7 @@ function showToast(type, message) {
   
   container.appendChild(toast);
   
+  // Remove toast after 4s
   setTimeout(() => {
     toast.style.animation = 'fadeOut 0.3s forwards';
     setTimeout(() => {
